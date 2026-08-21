@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account — Foodie Express</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .dash-page { padding-top:calc(var(--nav-height)+32px); padding-bottom:60px; }
+    .dash-grid { display:grid; grid-template-columns:220px 1fr; gap:28px; margin-top:24px; }
+    .side-nav { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:10px; height:fit-content; position:sticky; top:calc(var(--nav-height)+16px); }
+    .user-profile-mini { text-align:center; padding:18px 10px 16px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+    .avatar-circle { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--orange),var(--coral)); display:flex; align-items:center; justify-content:center; font-size:2rem; color:#fff; margin:0 auto 10px; font-family:var(--font-display); font-weight:700; }
+    .side-nav a { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:var(--radius-md); font-size:0.875rem; font-weight:600; color:var(--text-secondary); transition:all var(--transition); cursor:pointer; text-decoration:none; margin-bottom:2px; }
+    .side-nav a:hover,.side-nav a.active { background:rgba(255,107,43,0.08); color:var(--orange); }
+    .d-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:22px; margin-bottom:18px; }
+    .d-card h2 { font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:18px; }
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+    .kpi { background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; text-align:center; }
+    .kpi .kv { font-family:var(--font-display); font-size:1.6rem; font-weight:800; color:var(--orange); }
+    .kpi .kl { font-size:0.78rem; color:var(--text-secondary); margin-top:2px; }
+    .order-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .order-row:last-child { border-bottom:none; }
+    .order-img { width:48px; height:48px; border-radius:var(--radius-md); object-fit:cover; flex-shrink:0; }
+    .status-tag { font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:var(--radius-full); }
+    .s-delivered { background:rgba(22,163,74,0.1); color:#16A34A; }
+    .s-pending   { background:rgba(245,158,11,0.1); color:#D97706; }
+    .s-cancelled { background:rgba(239,68,68,0.1);  color:#EF4444; }
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+    .addr-card { border:1.5px solid var(--border); border-radius:var(--radius-md); padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+    .addr-lbl { font-size:0.72rem; font-weight:700; color:var(--orange); text-transform:uppercase; margin-bottom:3px; }
+    .form-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .loyalty-card { background:linear-gradient(135deg,var(--orange),var(--coral)); border-radius:var(--radius-xl); padding:28px; color:#fff; text-align:center; margin-bottom:20px; }
+    .loyalty-pts { font-family:var(--font-display); font-size:3.5rem; font-weight:800; line-height:1; }
+    @media(max-width:768px){ .dash-grid { grid-template-columns:1fr; } .side-nav { position:static; } .kpi-row { grid-template-columns:1fr 1fr; } .form-grid2 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div id="loader"><div class="loader-logo">🍔 Foodie Express</div><div class="loader-progress"><div class="loader-bar"></div></div></div>
+
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="logo-icon">🍔</div>Foodie<span>Express</span></a>
+    <div style="flex:1"></div>
+    <div class="nav-actions">
+      <button class="theme-toggle">🌙</button>
+      <button class="btn btn-primary btn-sm" id="nav-login-btn">Login</button>
+      <div id="nav-user-menu" style="display:none;align-items:center;gap:8px">
+        <span style="font-size:0.85rem">👤 <span id="nav-user-name"></span></span>
+        <button class="btn btn-ghost btn-sm" id="nav-logout">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="dash-page">
+  <div class="container">
+    <h1 style="font-family:var(--font-display);font-weight:800;font-size:1.8rem">My Account</h1>
+    <p style="color:var(--text-secondary)">Manage your profile, orders and preferences</p>
+
+    <div class="dash-grid">
+
+      <!-- SIDEBAR -->
+      <div class="side-nav">
+        <div class="user-profile-mini">
+          <div class="avatar-circle" id="av-letter">U</div>
+          <div style="font-family:var(--font-display);font-weight:700;font-size:0.95rem" id="av-name">User</div>
+          <div style="font-size:0.78rem;color:var(--text-secondary)" id="av-email"></div>
+          <div style="margin-top:8px;background:rgba(255,107,43,0.1);color:var(--orange);border-radius:var(--radius-full);padding:3px 12px;font-size:0.78rem;font-weight:700;display:inline-block">
+            🌟 <span id="av-pts">0</span> pts
+          </div>
+        </div>
+        <a class="active" onclick="showTab('overview',this)">📊 Overview</a>
+        <a onclick="showTab('orders',this)">📦 My Orders</a>
+        <a onclick="showTab('profile',this)">👤 Profile</a>
+        <a onclick="showTab('addresses',this)">📍 Addresses</a>
+        <a onclick="showTab('loyalty',this)">🌟 Loyalty & Referral</a>
+        <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">
+          <a href="../index.html">🏠 Home</a>
+          <a onclick="Auth.logout()" style="color:var(--coral)">🚪 Logout</a>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div>
+
+        <!-- OVERVIEW -->
+        <div class="tab-section active" id="tab-overview">
+          <div class="kpi-row">
+            <div class="kpi"><div class="kv" id="ov-orders">0</div><div class="kl">Total Orders</div></div>
+            <div class="kpi"><div class="kv" id="ov-pts">0</div><div class="kl">Loyalty Points</div></div>
+            <div class="kpi"><div class="kv" id="ov-saved">0</div><div class="kl">Saved Restaurants</div></div>
+            <div class="kpi"><div class="kv" id="ov-addrs">0</div><div class="kl">Addresses</div></div>
+          </div>
+          <div class="d-card">
+            <h2>📦 Recent Orders</h2>
+            <div id="recent-orders-el">
+              <div style="text-align:center;padding:40px;color:var(--text-muted)">
+                <div style="font-size:3rem;margin-bottom:12px">📭</div>
+                <p style="font-weight:600">No orders yet</p>
+                <a href="../restaurants.html" class="btn btn-primary btn-sm" style="margin-top:12px">Order Now →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDERS -->
+        <div class="tab-section" id="tab-orders">
+          <div class="d-card">
+            <h2>📦 Order History</h2>
+            <div id="all-orders-el">
+              <div style="text-align:center;padding:40px;color:var(--text-muted)">
+                <div style="font-size:3rem;margin-bottom:12px">📭</div>
+                <p style="font-weight:600">No orders found</p>
+                <a href="../restaurants.html" class="btn btn-primary btn-sm" style="margin-top:12px">Order Now →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="tab-section" id="tab-profile">
+          <div class="d-card">
+            <h2>👤 Edit Profile</h2>
+            <div class="form-grid2">
+              <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="p-name" placeholder="Your name"></div>
+              <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="p-email" placeholder="Email"></div>
+              <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="p-phone" placeholder="Phone" disabled></div>
+              <div class="form-group"><label class="form-label">Language</label>
+                <select class="form-input" id="p-lang">
+                  <option value="en">English</option>
+                  <option value="hi">हिंदी (Hindi)</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <div style="font-weight:700;margin-bottom:12px">Change Password</div>
+              <div class="form-grid2">
+                <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-input" id="p-curr" placeholder="Current password"></div>
+                <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-input" id="p-new" placeholder="New password (min 6 chars)"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:18px">
+              <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+              <button class="btn btn-ghost" onclick="loadProfile()">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADDRESSES -->
+        <div class="tab-section" id="tab-addresses">
+          <div class="d-card">
+            <h2>📍 Saved Addresses</h2>
+            <div id="addrs-el"></div>
+            <button class="btn btn-outline" style="margin-top:12px" onclick="toggleNewAddr()">+ Add New Address</button>
+            <div id="new-addr-form" style="display:none;margin-top:16px;background:var(--bg-secondary);border-radius:var(--radius-lg);padding:18px">
+              <div class="form-grid2">
+                <div class="form-group"><label class="form-label">Full Address *</label><input type="text" class="form-input" id="na-full" placeholder="Street address"></div>
+                <div class="form-group"><label class="form-label">Landmark</label><input type="text" class="form-input" id="na-lm" placeholder="Near..."></div>
+                <div class="form-group"><label class="form-label">City *</label><input type="text" class="form-input" id="na-city" placeholder="City"></div>
+                <div class="form-group"><label class="form-label">Pincode *</label><input type="text" class="form-input" id="na-pin" placeholder="Pincode"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button class="filter-chip active" onclick="setNaLabel(this,'Home')">🏠 Home</button>
+                <button class="filter-chip" onclick="setNaLabel(this,'Work')">🏢 Work</button>
+                <button class="filter-chip" onclick="setNaLabel(this,'Other')">📍 Other</button>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-primary btn-sm" onclick="addNewAddr()">Save Address</button>
+                <button class="btn btn-ghost btn-sm" onclick="toggleNewAddr()">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOYALTY -->
+        <div class="tab-section" id="tab-loyalty">
+          <div class="d-card">
+            <h2>🌟 Loyalty & Referral</h2>
+            <div class="loyalty-card">
+              <div style="font-size:0.9rem;opacity:.9;margin-bottom:4px">Your Points Balance</div>
+              <div class="loyalty-pts" id="loy-pts">0</div>
+              <div style="font-size:0.85rem;opacity:.85;margin-top:6px">= ₹<span id="loy-val">0</span> savings</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+              <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:16px;text-align:center">
+                <div style="font-size:1.5rem;margin-bottom:6px">🛍️</div>
+                <div style="font-weight:700;font-size:0.875rem">Earn Points</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px">1 point per ₹10 spent</div>
+              </div>
+              <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:16px;text-align:center">
+                <div style="font-size:1.5rem;margin-bottom:6px">💰</div>
+                <div style="font-weight:700;font-size:0.875rem">Redeem Points</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px">100 pts = ₹10 off</div>
+              </div>
+            </div>
+            <div style="font-weight:700;margin-bottom:10px">🤝 Refer a Friend</div>
+            <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:0.78rem;color:var(--text-secondary)">Your referral code</div>
+                <div style="font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--orange)" id="ref-code-disp">—</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="copyRef()">📋 Copy Code</button>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:10px">You earn 100 pts for every friend who signs up. They get 50 pts too!</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="modal-overlay" id="auth-modal"><div class="modal"><button class="modal-close">✕</button><div id="auth-modal-body"></div></div></div>
+
+<script src="../js/app.js"></script>
+<script>
+var naLabel = 'Home';
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (!AppState.user) { Auth.open('login'); }
+  loadDashboard();
+});
+
+function loadDashboard() {
+  var u = AppState.user;
+  if (!u) return;
+  // Avatar
+  var av = document.getElementById('av-letter'); if (av) av.textContent = u.name ? u.name[0].toUpperCase() : 'U';
+  var an = document.getElementById('av-name');   if (an) an.textContent = u.name || 'User';
+  var ae = document.getElementById('av-email');  if (ae) ae.textContent = u.email || u.phone || '';
+  var ap = document.getElementById('av-pts');    if (ap) ap.textContent = u.loyaltyPoints || 0;
+  // Nav name
+  var nn = document.getElementById('nav-user-name'); if (nn && u.name) nn.textContent = u.name.split(' ')[0];
+  // KPIs
+  var oa = document.getElementById('ov-addrs');   if (oa) oa.textContent = (u.addresses||[]).length;
+  var op = document.getElementById('ov-pts');     if (op) op.textContent = u.loyaltyPoints || 0;
+  var os = document.getElementById('ov-saved');   if (os) os.textContent = (u.savedRestaurants||[]).length;
+  // Profile fields
+  var pn = document.getElementById('p-name');  if (pn) pn.value = u.name || '';
+  var pe = document.getElementById('p-email'); if (pe) pe.value = u.email || '';
+  var pp = document.getElementById('p-phone'); if (pp) pp.value = u.phone || '';
+  // Loyalty
+  var lp = document.getElementById('loy-pts'); if (lp) lp.textContent = u.loyaltyPoints || 0;
+  var lv = document.getElementById('loy-val'); if (lv) lv.textContent = ((u.loyaltyPoints||0)*0.1).toFixed(0);
+  var rc = document.getElementById('ref-code-disp'); if (rc) rc.textContent = u.referralCode || '—';
+  // Addresses
+  renderAddresses();
+  // Fetch orders
+  fetchOrders();
+}
+
+async function fetchOrders() {
+  try {
+    var res = await API.get('/users/dashboard');
+    var d = res.data;
+    var oo = document.getElementById('ov-orders'); if (oo) oo.textContent = d.totalOrders || 0;
+    if (d.recentOrders && d.recentOrders.length) {
+      renderOrderList('recent-orders-el', d.recentOrders);
+      renderOrderList('all-orders-el', d.recentOrders);
+    }
+  } catch(e) { /* offline */ }
+}
+
+function renderOrderList(elId, orders) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = orders.map(function(o) {
+    var statusClass = o.status === 'delivered' ? 's-delivered' : o.status === 'cancelled' ? 's-cancelled' : 's-pending';
+    var statusText  = o.status ? o.status.replace(/_/g,' ') : 'pending';
+    return '<div class="order-row">' +
+      '<img class="order-img" src="' + (o.restaurant && o.restaurant.logo ? o.restaurant.logo : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=48') + '" alt="" onerror="this.src=\'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=48\'">' +
+      '<div style="flex:1">' +
+        '<div style="font-weight:700;font-size:0.9rem">' + (o.restaurant && o.restaurant.name ? o.restaurant.name : 'Restaurant') + '</div>' +
+        '<div style="font-size:0.8rem;color:var(--text-secondary)">#' + o.orderNumber + ' · ₹' + (o.pricing && o.pricing.total ? o.pricing.total : '—') + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--text-muted)">' + new Date(o.createdAt).toLocaleDateString('en-IN') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
+        '<span class="status-tag ' + statusClass + '">' + statusText + '</span>' +
+        '<a href="track.html?id=' + o._id + '" class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:3px 10px">Track</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderAddresses() {
+  var addrs = (AppState.user && AppState.user.addresses) || [];
+  var el = document.getElementById('addrs-el');
+  if (!el) return;
+  if (!addrs.length) { el.innerHTML = '<p style="color:var(--text-muted);font-size:0.875rem">No addresses saved yet.</p>'; return; }
+  el.innerHTML = addrs.map(function(a, i) {
+    return '<div class="addr-card">' +
+      '<div><div class="addr-lbl">' + (a.label||'Home') + '</div>' +
+        '<div style="font-weight:600;font-size:0.9rem">' + a.fullAddress + '</div>' +
+        '<div style="font-size:0.8rem;color:var(--text-secondary)">' + a.city + ' — ' + a.pincode + '</div></div>' +
+      '<button class="btn btn-ghost btn-sm" style="color:var(--coral);flex-shrink:0" onclick="deleteAddr(' + i + ')">🗑️</button>' +
+    '</div>';
+  }).join('');
+}
+
+function deleteAddr(idx) {
+  if (!confirm('Remove this address?')) return;
+  AppState.user.addresses.splice(idx, 1);
+  AppState.setUser(AppState.user);
+  renderAddresses();
+  Toast.success('Address removed');
+}
+
+function toggleNewAddr() { document.getElementById('new-addr-form').style.display = document.getElementById('new-addr-form').style.display === 'none' ? 'block' : 'none'; }
+function setNaLabel(btn, lbl) { naLabel = lbl; btn.closest('div').querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');}); btn.classList.add('active'); }
+
+function addNewAddr() {
+  var full = (document.getElementById('na-full').value||'').trim();
+  var city = (document.getElementById('na-city').value||'').trim();
+  var pin  = (document.getElementById('na-pin').value||'').trim();
+  if (!full||!city||!pin) { Toast.error('Fill required fields'); return; }
+  AppState.user.addresses = AppState.user.addresses || [];
+  AppState.user.addresses.push({ label:naLabel, fullAddress:full, landmark:document.getElementById('na-lm').value||'', city:city, pincode:pin });
+  AppState.setUser(AppState.user);
+  toggleNewAddr();
+  renderAddresses();
+  loadDashboard();
+  Toast.success('Address saved!');
+}
+
+async function saveProfile() {
+  var name = (document.getElementById('p-name').value||'').trim();
+  if (!name) { Toast.error('Name is required'); return; }
+  var newPass = (document.getElementById('p-new').value||'').trim();
+  if (newPass && newPass.length < 6) { Toast.error('New password must be at least 6 characters'); return; }
+  try {
+    var payload = { name:name, language:document.getElementById('p-lang').value };
+    if (newPass) payload.password = newPass;
+    var res = await API.put('/users/profile', payload);
+    AppState.setUser(Object.assign({}, AppState.user, res.data));
+    Toast.success('Profile updated!');
+    loadDashboard();
+  } catch(e) {
+    AppState.user.name = name;
+    AppState.setUser(AppState.user);
+    Toast.success('Profile saved locally!');
+    loadDashboard();
+  }
+}
+
+function loadProfile() { loadDashboard(); }
+
+function copyRef() {
+  var code = AppState.user && AppState.user.referralCode;
+  if (!code) { Toast.error('No referral code available'); return; }
+  navigator.clipboard.writeText(code).then(function() { Toast.success('Referral code copied: ' + code); }).catch(function() { Toast.info('Your code: ' + code); });
+}
+
+function showTab(name, el) {
+  document.querySelectorAll('.tab-section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.side-nav a').forEach(function(a) { a.classList.remove('active'); });
+  var tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.add('active');
+  if (el) el.classList.add('active');
+}
+</script>
+</body>
+</html>

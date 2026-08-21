@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant — Foodie Express</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .rest-banner { position:relative; height:300px; margin-top:var(--nav-height); overflow:hidden; background:#111; }
+    .rest-banner img { width:100%; height:100%; object-fit:cover; opacity:0.85; }
+    .banner-gradient { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,transparent 55%); }
+    .banner-info { position:absolute; bottom:0; left:0; right:0; padding:28px 32px; color:#fff; }
+    .banner-info h1 { font-size:2rem; font-weight:800; margin-bottom:6px; }
+    .banner-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .banner-badge { background:rgba(255,255,255,0.18); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.25); border-radius:var(--radius-full); padding:4px 12px; font-size:0.8rem; font-weight:600; }
+    .page-body { display:grid; grid-template-columns:1fr 300px; gap:28px; padding:32px 0 60px; }
+    .menu-section { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); overflow:hidden; margin-bottom:20px; }
+    .menu-sec-header { padding:18px 22px; font-family:var(--font-display); font-weight:800; font-size:1rem; background:var(--bg-secondary); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .menu-item { display:flex; align-items:center; gap:16px; padding:18px 22px; border-bottom:1px solid var(--border); transition:background var(--transition); }
+    .menu-item:last-child { border-bottom:none; }
+    .menu-item:hover { background:var(--bg-secondary); }
+    .menu-item-img { width:100px; height:80px; border-radius:var(--radius-md); object-fit:cover; flex-shrink:0; }
+    .menu-item-body { flex:1; min-width:0; }
+    .menu-item-name { font-weight:700; font-size:0.95rem; margin-bottom:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .menu-item-desc { font-size:0.82rem; color:var(--text-secondary); margin-bottom:8px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .menu-item-meta { font-size:0.78rem; color:var(--text-muted); display:flex; gap:10px; }
+    .menu-price-row { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+    .veg-dot { width:18px; height:18px; border-radius:3px; border:1.5px solid; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .veg-dot.veg { border-color:#16A34A; }
+    .veg-dot.veg::after { content:''; width:8px; height:8px; border-radius:50%; background:#16A34A; }
+    .veg-dot.nonveg { border-color:var(--coral); }
+    .veg-dot.nonveg::after { content:''; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:8px solid var(--coral); }
+    .tag-pill { font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:var(--radius-full); }
+    .tag-best { background:var(--gold); color:#0D0D0D; }
+    .tag-pop  { background:rgba(255,107,43,0.12); color:var(--orange); }
+    .sidebar-box { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:20px; margin-bottom:18px; }
+    .sidebar-box h3 { font-family:var(--font-display); font-weight:800; font-size:0.95rem; margin-bottom:14px; }
+    .info-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
+    .info-row:last-child { border-bottom:none; }
+    .info-row .lbl { color:var(--text-secondary); flex-shrink:0; }
+    .info-row .val { font-weight:600; text-align:right; }
+    .sticky-side { position:sticky; top:calc(var(--nav-height) + 16px); }
+    .menu-nav-scroll { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; margin-bottom:20px; }
+    .menu-nav-scroll::-webkit-scrollbar { display:none; }
+    .menu-nav-btn { flex-shrink:0; padding:7px 16px; border-radius:var(--radius-full); font-size:0.82rem; font-weight:600; border:1.5px solid var(--border); background:var(--bg-card); color:var(--text-secondary); cursor:pointer; transition:all var(--transition); white-space:nowrap; }
+    .menu-nav-btn:hover,.menu-nav-btn.active { border-color:var(--orange); color:var(--orange); background:rgba(255,107,43,0.06); }
+    .veg-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg-secondary); border-radius:var(--radius-md); margin-bottom:18px; font-size:0.875rem; font-weight:600; }
+    .toggle-wrap { position:relative; width:40px; height:22px; flex-shrink:0; }
+    .toggle-wrap input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; inset:0; border-radius:22px; background:var(--border); cursor:pointer; transition:.3s; }
+    .slider::before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; border-radius:50%; background:#fff; transition:.3s; }
+    input:checked + .slider { background:#16A34A; }
+    input:checked + .slider::before { transform:translateX(18px); }
+    @media(max-width:900px) { .page-body { grid-template-columns:1fr; } .sticky-side { position:static; } }
+    @media(max-width:600px) { .rest-banner { height:220px; } .banner-info h1 { font-size:1.4rem; } .menu-item-img { width:76px; height:64px; } }
+  </style>
+</head>
+<body>
+<div id="loader"><div class="loader-logo">🍔 Foodie Express</div><div class="loader-progress"><div class="loader-bar"></div></div></div>
+
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="logo-icon">🍔</div>Foodie<span>Express</span></a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../restaurants.html">Restaurants</a>
+      <a href="offers.html">Offers</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle">🌙</button>
+      <button class="cart-btn">🛒 Cart <span class="cart-count" style="display:none">0</span></button>
+      <button class="btn btn-primary btn-sm" id="nav-login-btn">Login</button>
+      <div id="nav-user-menu" style="display:none;align-items:center;gap:8px">
+        <a href="dashboard.html" class="btn btn-ghost btn-sm">👤 <span id="nav-user-name"></span></a>
+        <button class="btn btn-ghost btn-sm" id="nav-logout">Logout</button>
+      </div>
+    </div>
+    <div class="hamburger"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="../index.html">🏠 Home</a>
+  <a href="../restaurants.html">🍽️ Restaurants</a>
+  <a href="dashboard.html">👤 My Account</a>
+</div>
+
+<!-- BANNER -->
+<div class="rest-banner">
+  <img id="banner-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200" alt="Restaurant">
+  <div class="banner-gradient"></div>
+  <div class="banner-info">
+    <div style="margin-bottom:6px"><a href="../restaurants.html" style="color:rgba(255,255,255,0.65);font-size:0.85rem">← All Restaurants</a></div>
+    <h1 id="rest-name">Loading...</h1>
+    <div id="rest-cuisines" style="color:rgba(255,255,255,0.8);font-size:0.9rem"></div>
+    <div class="banner-badges" id="rest-badges"></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-body">
+
+    <!-- LEFT: MENU -->
+    <div>
+      <div class="veg-row">
+        <label class="toggle-wrap">
+          <input type="checkbox" id="veg-only" onchange="applyVegFilter()">
+          <span class="slider"></span>
+        </label>
+        <span>🟢 Show Veg Only</span>
+      </div>
+      <div class="menu-nav-scroll" id="menu-nav"></div>
+      <div id="menu-container"><div class="menu-section"><div class="menu-sec-header">⏳ Loading menu...</div></div></div>
+
+      <!-- Reviews -->
+      <div style="margin-top:36px">
+        <h2 style="font-family:var(--font-display);font-weight:800;font-size:1.2rem;margin-bottom:16px">⭐ Customer Reviews</h2>
+        <div class="reviews-track" id="reviews-track"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div class="sticky-side">
+      <div class="sidebar-box">
+        <h3>📋 Restaurant Info</h3>
+        <div id="rest-info"><div class="skeleton" style="height:160px;border-radius:8px"></div></div>
+      </div>
+      <div class="sidebar-box">
+        <h3>🏷️ Active Offers</h3>
+        <div id="rest-offers"><p style="color:var(--text-muted);font-size:0.875rem">No active offers</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CART & AUTH -->
+<div id="cart-overlay"></div>
+<div id="cart-sidebar">
+  <div class="cart-header"><div class="cart-title">🛒 Your Cart</div><button class="cart-close">✕</button></div>
+  <div class="cart-items" id="cart-items"><div class="empty-cart"><div class="empty-icon">🛒</div><p>Your cart is empty</p></div></div>
+  <div class="cart-footer">
+    <div class="coupon-input-wrap"><input type="text" class="coupon-input" placeholder="COUPON CODE" style="text-transform:uppercase"><button class="btn btn-outline btn-sm" id="apply-coupon-btn">Apply</button></div>
+    <div class="cart-summary" id="cart-summary"></div>
+    <button class="btn btn-primary w-full" style="justify-content:center" id="checkout-btn">Checkout →</button>
+  </div>
+</div>
+<div class="modal-overlay" id="auth-modal"><div class="modal"><button class="modal-close">✕</button><div id="auth-modal-body"></div></div></div>
+<div id="toast-container"></div>
+
+<script src="../js/app.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DEMO DATABASE — all 8 restaurants with full menus
+   Keyed by the same IDs used in restaurants.html DEMO_DATA
+   ═══════════════════════════════════════════════════════════ */
+var DEMO_DB = {
+
+  /* ── 1. The Burger Palace ─────────────────────────────── */
+  'demo1': {
+    restaurant: {
+      _id:'demo1', name:'The Burger Palace',
+      cuisines:['American','Burgers','Fast Food'],
+      rating:4.5, totalRatings:1250, deliveryTime:25,
+      deliveryFee:30, minOrder:150, freeDeliveryAbove:400,
+      isOpen:true, isPureVeg:false,
+      banner:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200',
+      address:{ fullAddress:'MG Road, Lucknow' }, phone:'9876543210',
+      offers:[{ title:'20% OFF', description:'On orders above ₹300', code:'BURGER20' }]
+    },
+    menu:[
+      { category:'Burgers', items:[
+        { _id:'b1', name:'Classic Burger',   isVeg:false, isPopular:true,  isBestseller:true,  price:249, rating:4.6, calories:520, preparationTime:12, description:'Juicy  patty with lettuce, tomato, and special sauce.',        image:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' },
+        { _id:'b2', name:'Crispy Chicken Burger', isVeg:false, isPopular:true,  isBestseller:false, price:229, discountedPrice:199, rating:4.4, calories:480, preparationTime:10, description:'Golden fried chicken with coleslaw and honey mustard.', image:'https://images.unsplash.com/photo-1606755962773-d324e9a2e0b4?w=300' },
+        { _id:'b3', name:'Veggie Supreme Burger', isVeg:true,  isPopular:false, isBestseller:false, price:199, rating:4.2, calories:380, preparationTime:8,  description:'Hearty veggie patty with avocado and chipotle mayo.',            image:'https://images.unsplash.com/photo-1550547660-d9450f859349?w=300' },
+        { _id:'b4', name:'Double Smash Burger',   isVeg:false, isPopular:false, isBestseller:true,  price:349, rating:4.8, calories:720, preparationTime:15, description:'Two smashed beef patties with American cheese and secret sauce.',  image:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=300' }
+      ]},
+      { category:'Fries', items:[
+        { _id:'b5', name:'Loaded Cheese Fries',    isVeg:true, price:149, rating:4.5, calories:380, preparationTime:8,  description:'Crispy fries topped with melted cheese sauce and jalapeños.', image:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300' },
+        { _id:'b6', name:'Truffle Parmesan Fries', isVeg:true, price:179, rating:4.7, calories:420, preparationTime:10, description:'Premium fries tossed in truffle oil and parmesan.',             image:'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=300' }
+      ]},
+      { category:'Drinks', items:[
+        { _id:'b7', name:'Chocolate Milkshake', isVeg:true, price:129, rating:4.3, calories:340, preparationTime:5, description:'Thick and creamy chocolate shake with whipped cream.', image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { _id:'b8', name:'Strawberry Shake',    isVeg:true, price:119, rating:4.1, calories:310, preparationTime:5, description:'Fresh strawberry milkshake, cool and refreshing.',      image:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' }
+      ]},
+      { category:'Desserts', items:[
+        { _id:'b9', name:'Nutella Brownie', isVeg:true, isBestseller:true, price:149, rating:4.9, preparationTime:5, description:'Warm fudgy brownie with Nutella swirl and vanilla ice cream.', image:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Aarav S.' }, rating:5, comment:'Best burger in town! The smash burger is absolutely incredible.', createdAt: new Date(Date.now()-86400000) },
+      { user:{ name:'Priya M.' }, rating:4, comment:'Great food and fast delivery. Cheese fries are addictive!',       createdAt: new Date(Date.now()-172800000) },
+      { user:{ name:'Rahul K.' }, rating:5, comment:'Authentic taste, generous portions. Will definitely order again!', createdAt: new Date(Date.now()-259200000) }
+    ]
+  },
+
+  /* ── 2. Pizza Paradise ────────────────────────────────── */
+  'demo2': {
+    restaurant: {
+      _id:'demo2', name:'Pizza Paradise',
+      cuisines:['Italian','Pizza','Fast Food'],
+      rating:4.3, totalRatings:890, deliveryTime:35,
+      deliveryFee:40, minOrder:200, freeDeliveryAbove:500,
+      isOpen:true, isPureVeg:true,
+      banner:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200',
+      address:{ fullAddress:'Hazratganj, Lucknow' }, phone:'9876543211',
+      offers:[{ title:'BUY 2 GET 1', description:'Buy any 2 pizzas, get 1 garlic bread free', code:'PIZZA2GET1' }]
+    },
+    menu:[
+      { category:'Pizzas', items:[
+        { _id:'p1', name:'Margherita Pizza',     isVeg:true,  isPopular:true,  isBestseller:true,  price:299, rating:4.5, calories:680, preparationTime:20, description:'Classic tomato base with fresh mozzarella and basil.',             image:'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300' },
+        { _id:'p2', name:'Farm Fresh Veggie',    isVeg:true,  isPopular:true,  isBestseller:false, price:349, rating:4.3, calories:720, preparationTime:22, description:'Loaded with bell peppers, olives, onions and mushrooms.',          image:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300' },
+        { _id:'p3', name:'Paneer Tikka Pizza',   isVeg:true,  isPopular:false, isBestseller:true,  price:379, rating:4.6, calories:780, preparationTime:22, description:'Indian-fusion pizza with spicy paneer tikka topping.',            image:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300' },
+        { _id:'p4', name:'Double Cheese Pizza',  isVeg:true,  isPopular:false, isBestseller:false, price:329, rating:4.4, calories:850, preparationTime:20, description:'Extra mozzarella and cheddar on a rich tomato base.',             image:'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300' }
+      ]},
+      { category:'Pasta', items:[
+        { _id:'p5', name:'Penne Arrabbiata', isVeg:true, price:249, rating:4.2, calories:520, preparationTime:15, description:'Spicy tomato sauce with penne pasta and fresh herbs.', image:'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=300' },
+        { _id:'p6', name:'Alfredo Pasta',    isVeg:true, isBestseller:true, price:279, rating:4.5, calories:610, preparationTime:15, description:'Rich creamy white sauce pasta with garlic and parmesan.', image:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300' }
+      ]},
+      { category:'Sides', items:[
+        { _id:'p7', name:'Garlic Bread',       isVeg:true, price:99,  rating:4.4, calories:240, preparationTime:8,  description:'Toasted bread with garlic butter and herbs.',           image:'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=300' },
+        { _id:'p8', name:'Cheesy Garlic Bread', isVeg:true, price:129, rating:4.6, calories:320, preparationTime:10, description:'Garlic bread loaded with extra mozzarella cheese.',      image:'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=300' }
+      ]},
+      { category:'Drinks', items:[
+        { _id:'p9', name:'Lemonade',     isVeg:true, price:79,  rating:4.3, preparationTime:3, description:'Fresh squeezed lemonade with mint and ice.', image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { _id:'p10',name:'Soft Drink',   isVeg:true, price:59,  rating:4.0, preparationTime:2, description:'Chilled Pepsi, 7Up, or Mountain Dew.',       image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Sneha J.' }, rating:5, comment:'Best pizza I have had outside Italy! The margherita is perfect.', createdAt: new Date(Date.now()-43200000) },
+      { user:{ name:'Rohit P.' }, rating:4, comment:'Paneer tikka pizza is a genius fusion. Will definitely order again!', createdAt: new Date(Date.now()-86400000) },
+      { user:{ name:'Meera K.' }, rating:4, comment:'Fast delivery and piping hot food. Garlic bread is addictive!', createdAt: new Date(Date.now()-129600000) }
+    ]
+  },
+
+  /* ── 3. Spice Garden ──────────────────────────────────── */
+  'demo3': {
+    restaurant: {
+      _id:'demo3', name:'Spice Garden',
+      cuisines:['North Indian','Biryani','Tandoor'],
+      rating:4.7, totalRatings:2100, deliveryTime:40,
+      deliveryFee:25, minOrder:250, freeDeliveryAbove:600,
+      isOpen:true, isPureVeg:false,
+      banner:'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=1200',
+      address:{ fullAddress:'Gomti Nagar, Lucknow' }, phone:'9876543212',
+      offers:[{ title:'15% OFF', description:'On all biryani orders', code:'BIRYANI15' }]
+    },
+    menu:[
+      { category:'Starters', items:[
+        { _id:'s1', name:'Paneer Tikka',      isVeg:true,  isPopular:true,  isBestseller:true,  price:249, rating:4.7, calories:320, preparationTime:15, description:'Marinated cottage cheese grilled in tandoor with aromatic spices.',      image:'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300' },
+        { _id:'s2', name:'Chicken Seekh Kebab', isVeg:false, isPopular:true,  isBestseller:false, price:279, rating:4.6, calories:380, preparationTime:18, description:'Minced chicken kebabs with herbs and spices, served with mint chutney.', image:'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=300' },
+        { _id:'s3', name:'Veg Shammi Kebab',  isVeg:true,  isPopular:false, isBestseller:false, price:199, rating:4.3, calories:280, preparationTime:12, description:'Crispy fried lentil and vegetable patties with green chutney.',            image:'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300' }
+      ]},
+      { category:'Main Course', items:[
+        { _id:'s4', name:'Butter Chicken',    isVeg:false, isPopular:true,  isBestseller:true,  price:329, rating:4.8, calories:480, preparationTime:20, description:'Tender chicken in rich buttery tomato gravy, a classic favourite.',       image:'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=300' },
+        { _id:'s5', name:'Dal Makhani',       isVeg:true,  isPopular:true,  isBestseller:false, price:219, rating:4.6, calories:380, preparationTime:25, description:'Slow-cooked black lentils in a rich creamy tomato-butter gravy.',         image:'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300' },
+        { _id:'s6', name:'Palak Paneer',      isVeg:true,  isPopular:false, isBestseller:false, price:239, rating:4.5, calories:340, preparationTime:20, description:'Fresh cottage cheese in a smooth spinach and spice gravy.',               image:'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300' },
+        { _id:'s7', name:'Mutton Rogan Josh', isVeg:false, isPopular:false, isBestseller:false, price:379, rating:4.7, calories:520, preparationTime:30, description:'Slow-cooked mutton in Kashmiri spices, rich and aromatic.',               image:'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=300' }
+      ]},
+      { category:'Biryani', items:[
+        { _id:'s8', name:'Chicken Biryani',  isVeg:false, isPopular:true, isBestseller:true,  price:349, rating:4.9, calories:680, preparationTime:25, description:'Fragrant basmati rice with tender chicken and whole spices.',              image:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300' },
+        { _id:'s9', name:'Veg Biryani',      isVeg:true,  isPopular:true, isBestseller:false, price:299, rating:4.6, calories:580, preparationTime:22, description:'Aromatic basmati rice with mixed vegetables and saffron.',               image:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300' },
+        { _id:'s10',name:'Mutton Biryani',   isVeg:false, isPopular:false,isBestseller:false, price:399, rating:4.8, calories:720, preparationTime:30, description:'Slow-cooked mutton pieces layered with fragrant basmati rice.',           image:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300' }
+      ]},
+      { category:'Breads', items:[
+        { _id:'s11',name:'Garlic Naan',      isVeg:true, price:49, rating:4.5, calories:180, preparationTime:8,  description:'Soft leavened bread with garlic butter, baked in tandoor.', image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300' },
+        { _id:'s12',name:'Butter Naan',      isVeg:true, price:39, rating:4.4, calories:160, preparationTime:8,  description:'Classic buttered naan, soft and fluffy from the tandoor.',  image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300' },
+        { _id:'s13',name:'Laccha Paratha',   isVeg:true, price:45, rating:4.3, calories:200, preparationTime:10, description:'Multi-layered whole wheat flatbread, crispy and flaky.',     image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300' }
+      ]},
+      { category:'Desserts', items:[
+        { _id:'s14',name:'Gulab Jamun',      isVeg:true, isBestseller:true, price:99,  rating:4.7, calories:280, preparationTime:5, description:'Soft milk-solid dumplings soaked in rose-flavored sugar syrup.', image:'https://images.unsplash.com/photo-1666400440588-5a2a42c35f4a?w=300' },
+        { _id:'s15',name:'Gajar Halwa',      isVeg:true, price:119, rating:4.5, calories:340, preparationTime:8, description:'Traditional carrot pudding with khoya, nuts, and cardamom.',   image:'https://images.unsplash.com/photo-1666400440588-5a2a42c35f4a?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Vikram S.' }, rating:5, comment:'The chicken biryani is absolutely out of this world! Best in Lucknow.', createdAt: new Date(Date.now()-21600000) },
+      { user:{ name:'Ananya R.' }, rating:5, comment:'Authentic flavors, generous portions. Butter chicken is divine!', createdAt: new Date(Date.now()-43200000) },
+      { user:{ name:'Karan M.' }, rating:4, comment:'Great food overall. The kebabs as starters were excellent.', createdAt: new Date(Date.now()-86400000) }
+    ]
+  },
+
+  /* ── 4. Sushi Spot ────────────────────────────────────── */
+  'demo4': {
+    restaurant: {
+      _id:'demo4', name:'Sushi Spot',
+      cuisines:['Japanese','Sushi','Asian'],
+      rating:4.6, totalRatings:670, deliveryTime:45,
+      deliveryFee:0, minOrder:300, freeDeliveryAbove:0,
+      isOpen:true, isPureVeg:false,
+      banner:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=1200',
+      address:{ fullAddress:'Hazratganj, Lucknow' }, phone:'9876543213',
+      offers:[{ title:'FREE DELIVERY', description:'Free delivery on all orders', code:'SUSHIFREE' }]
+    },
+    menu:[
+      { category:'Rolls', items:[
+        { _id:'su1', name:'California Roll',    isVeg:false, isPopular:true,  isBestseller:true,  price:349, rating:4.7, calories:320, preparationTime:15, description:'Crab, avocado, and cucumber inside out roll with sesame seeds.', image:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' },
+        { _id:'su2', name:'Dragon Roll',        isVeg:false, isPopular:true,  isBestseller:false, price:399, rating:4.6, calories:380, preparationTime:18, description:'Shrimp tempura topped with avocado and spicy mayo.',            image:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' },
+        { _id:'su3', name:'Veggie Maki Roll',   isVeg:true,  isPopular:false, isBestseller:false, price:279, rating:4.3, calories:240, preparationTime:12, description:'Cucumber, avocado, and pickled radish in nori and rice.',       image:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' }
+      ]},
+      { category:'Nigiri & Sashimi', items:[
+        { _id:'su4', name:'Salmon Nigiri (2 pc)',   isVeg:false, isBestseller:true, price:299, rating:4.8, calories:180, preparationTime:10, description:'Fresh salmon over seasoned sushi rice with wasabi.',         image:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' },
+        { _id:'su5', name:'Tuna Sashimi (5 pc)',    isVeg:false, isPopular:true,    price:349, rating:4.7, calories:160, preparationTime:10, description:'Premium sliced tuna served with soy sauce and pickled ginger.', image:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' }
+      ]},
+      { category:'Sides', items:[
+        { _id:'su6', name:'Miso Soup',   isVeg:true,  price:99,  rating:4.5, calories:80,  preparationTime:5, description:'Traditional Japanese soup with tofu, seaweed, and spring onion.', image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' },
+        { _id:'su7', name:'Edamame',     isVeg:true,  price:129, rating:4.4, calories:120, preparationTime:5, description:'Steamed young soybeans with sea salt.',                           image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' }
+      ]},
+      { category:'Drinks', items:[
+        { _id:'su8', name:'Green Tea',    isVeg:true, price:79,  rating:4.6, preparationTime:3, description:'Hot or iced authentic Japanese green tea.', image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { _id:'su9', name:'Yuzu Lemonade',isVeg:true, price:129, rating:4.5, preparationTime:5, description:'Japanese citrus lemonade, refreshingly tart.', image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Priya K.' }, rating:5, comment:'Freshest sushi in the city! The dragon roll is phenomenal.', createdAt: new Date(Date.now()-43200000) },
+      { user:{ name:'Arjun S.' }, rating:4, comment:'Authentic Japanese flavors. Miso soup is comforting.', createdAt: new Date(Date.now()-86400000) }
+    ]
+  },
+
+  /* ── 5. Chinese Dragon ────────────────────────────────── */
+  'demo5': {
+    restaurant: {
+      _id:'demo5', name:'Chinese Dragon',
+      cuisines:['Chinese','Noodles','Asian'],
+      rating:4.2, totalRatings:540, deliveryTime:30,
+      deliveryFee:20, minOrder:150, freeDeliveryAbove:300,
+      isOpen:true, isPureVeg:false,
+      banner:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200',
+      address:{ fullAddress:'Aliganj, Lucknow' }, phone:'9876543214',
+      offers:[]
+    },
+    menu:[
+      { category:'Starters', items:[
+        { _id:'c1', name:'Veg Spring Rolls (6 pc)',    isVeg:true,  isPopular:true,  isBestseller:true,  price:149, rating:4.4, calories:280, preparationTime:12, description:'Crispy golden rolls stuffed with fresh vegetables and glass noodles.', image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' },
+        { _id:'c2', name:'Chicken Dimsums (6 pc)',     isVeg:false, isPopular:true,  isBestseller:false, price:179, rating:4.3, calories:320, preparationTime:15, description:'Steamed or fried dumplings with minced chicken filling.',               image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' },
+        { _id:'c3', name:'Chilli Paneer (Dry)',        isVeg:true,  isPopular:false, isBestseller:false, price:199, rating:4.2, calories:360, preparationTime:15, description:'Indo-Chinese crispy paneer tossed in spicy chilli sauce.',              image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' }
+      ]},
+      { category:'Noodles & Rice', items:[
+        { _id:'c4', name:'Veg Hakka Noodles',       isVeg:true,  isPopular:true, isBestseller:true,  price:169, rating:4.5, calories:480, preparationTime:12, description:'Stir-fried noodles with fresh vegetables in soy sauce.',         image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' },
+        { _id:'c5', name:'Chicken Fried Rice',      isVeg:false, isPopular:true, isBestseller:false, price:199, rating:4.4, calories:520, preparationTime:15, description:'Wok-tossed rice with chicken, eggs, and seasonal vegetables.',  image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' },
+        { _id:'c6', name:'Schezwan Fried Rice',     isVeg:true,  isPopular:false,isBestseller:false, price:179, rating:4.3, calories:500, preparationTime:12, description:'Spicy Schezwan sauce fried rice with mixed vegetables.',          image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' }
+      ]},
+      { category:'Soups', items:[
+        { _id:'c7', name:'Hot & Sour Soup',  isVeg:false, isBestseller:true, price:129, rating:4.6, calories:120, preparationTime:10, description:'Classic Chinese soup with a spicy and tangy flavor profile.', image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' },
+        { _id:'c8', name:'Sweet Corn Soup',  isVeg:true,  price:99,  rating:4.3, calories:100, preparationTime:8,  description:'Thick creamy corn soup, mild and comforting.',                image:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Rahul G.' }, rating:4, comment:'Hakka noodles are fantastic! Quick delivery too.', createdAt: new Date(Date.now()-43200000) },
+      { user:{ name:'Sunita P.' }, rating:4, comment:'Dimsums are delicious, nice and juicy inside.', createdAt: new Date(Date.now()-86400000) }
+    ]
+  },
+
+  /* ── 6. The Dessert House ─────────────────────────────── */
+  'demo6': {
+    restaurant: {
+      _id:'demo6', name:'The Dessert House',
+      cuisines:['Desserts','Bakery','Cafe'],
+      rating:4.8, totalRatings:980, deliveryTime:20,
+      deliveryFee:15, minOrder:100, freeDeliveryAbove:250,
+      isOpen:true, isPureVeg:true,
+      banner:'https://images.unsplash.com/photo-1488477304112-4944851de03d?w=1200',
+      address:{ fullAddress:'Indiranagar, Lucknow' }, phone:'9876543215',
+      offers:[{ title:'BUY 2 GET 1', description:'Buy 2 desserts, get 1 free', code:'SWEET3' }]
+    },
+    menu:[
+      { category:'Cakes & Pastries', items:[
+        { _id:'d1', name:'Belgian Chocolate Cake',  isVeg:true, isPopular:true, isBestseller:true,  price:249, rating:4.9, calories:480, preparationTime:5, description:'Rich dark Belgian chocolate cake with ganache frosting.',    image:'https://images.unsplash.com/photo-1488477304112-4944851de03d?w=300' },
+        { _id:'d2', name:'Red Velvet Cake',         isVeg:true, isPopular:true, isBestseller:false, price:229, rating:4.8, calories:440, preparationTime:5, description:'Classic red velvet with cream cheese frosting.',             image:'https://images.unsplash.com/photo-1488477304112-4944851de03d?w=300' },
+        { _id:'d3', name:'Tiramisu',                isVeg:true, isPopular:false,isBestseller:true,  price:199, rating:4.7, calories:380, preparationTime:3, description:'Italian coffee-flavored dessert with mascarpone and cocoa.', image:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300' }
+      ]},
+      { category:'Ice Cream', items:[
+        { _id:'d4', name:'Belgian Waffle Sundae',    isVeg:true, isPopular:true, isBestseller:true,  price:199, rating:4.8, calories:560, preparationTime:8, description:'Crispy waffle with 3 scoops ice cream and chocolate sauce.', image:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300' },
+        { _id:'d5', name:'Nutella Ice Cream Crepe', isVeg:true, isPopular:false,isBestseller:false, price:179, rating:4.6, calories:490, preparationTime:10,'description':'Thin crepe filled with Nutella and vanilla ice cream.',     image:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300' }
+      ]},
+      { category:'Drinks', items:[
+        { _id:'d6', name:'Hot Chocolate',      isVeg:true, isPopular:true, price:129, rating:4.7, calories:280, preparationTime:5, description:'Rich velvety hot chocolate with whipped cream.',    image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { _id:'d7', name:'Cold Coffee Frappe', isVeg:true, price:149, rating:4.6, calories:320, preparationTime:5, description:'Blended iced coffee with cream and caramel drizzle.', image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Aisha K.' }, rating:5, comment:'The chocolate cake is heavenly! Best desserts in the city by far.', createdAt: new Date(Date.now()-21600000) },
+      { user:{ name:'Dev M.' }, rating:5, comment:'Waffle sundae is to die for. Fast delivery and everything arrived intact!', createdAt: new Date(Date.now()-43200000) }
+    ]
+  },
+
+  /* ── 7. Taco Fiesta ───────────────────────────────────── */
+  'demo7': {
+    restaurant: {
+      _id:'demo7', name:'Taco Fiesta',
+      cuisines:['Mexican','Tacos','Wraps'],
+      rating:4.1, totalRatings:430, deliveryTime:35,
+      deliveryFee:35, minOrder:150, freeDeliveryAbove:400,
+      isOpen:true, isPureVeg:false,
+      banner:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200',
+      address:{ fullAddress:'Gomti Nagar Extension, Lucknow' }, phone:'9876543216',
+      offers:[]
+    },
+    menu:[
+      { category:'Tacos', items:[
+        { _id:'t1', name:'Classic Chicken Taco',  isVeg:false, isPopular:true,  isBestseller:true,  price:149, rating:4.3, calories:280, preparationTime:10, description:'Grilled chicken with salsa, sour cream, and shredded cheese.',  image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' },
+        { _id:'t2', name:'Spicy Beef Taco',       isVeg:false, isPopular:true,  isBestseller:false, price:169, rating:4.2, calories:320, preparationTime:10, description:'Seasoned minced beef with jalapeños and chipotle sauce.',         image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' },
+        { _id:'t3', name:'Veggie Bean Taco',      isVeg:true,  isPopular:false, isBestseller:false, price:129, rating:4.0, calories:240, preparationTime:8,  description:'Spiced black beans with guacamole, lettuce, and tomato salsa.',   image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' }
+      ]},
+      { category:'Burritos', items:[
+        { _id:'t4', name:'Chicken Burrito',       isVeg:false, isPopular:true, isBestseller:true, price:249, rating:4.4, calories:580, preparationTime:12, description:'Large flour tortilla with grilled chicken, rice, beans and cheese.', image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' },
+        { _id:'t5', name:'Veg Burrito Bowl',      isVeg:true,  isPopular:false,isBestseller:false, price:219, rating:4.2, calories:480, preparationTime:10, description:'Burrito bowl with rice, black beans, roasted veggies and guacamole.', image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' }
+      ]},
+      { category:'Sides', items:[
+        { _id:'t6', name:'Nachos with Dips',      isVeg:true, isBestseller:true, price:149, rating:4.5, calories:420, preparationTime:8, description:'Crispy tortilla chips with salsa, sour cream, and guacamole dips.', image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' },
+        { _id:'t7', name:'Mexican Rice',          isVeg:true, price:99, rating:4.1, calories:280, preparationTime:8, description:'Spiced Mexican tomato rice with herbs and corn.', image:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Sahil R.' }, rating:4, comment:'Finally authentic Mexican food in Lucknow! Burritos are huge.', createdAt: new Date(Date.now()-43200000) },
+      { user:{ name:'Tanya S.' }, rating:4, comment:'Nachos are amazing. The guacamole is super fresh.', createdAt: new Date(Date.now()-86400000) }
+    ]
+  },
+
+  /* ── 8. Health Bowl ───────────────────────────────────── */
+  'demo8': {
+    restaurant: {
+      _id:'demo8', name:'Health Bowl',
+      cuisines:['Healthy','Salads','Bowls'],
+      rating:4.4, totalRatings:320, deliveryTime:25,
+      deliveryFee:0, minOrder:150, freeDeliveryAbove:0,
+      isOpen:true, isPureVeg:true,
+      banner:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200',
+      address:{ fullAddress:'Vibhuti Khand, Lucknow' }, phone:'9876543217',
+      offers:[{ title:'FREE DELIVERY', description:'Always free delivery on all orders', code:'HEALTHFREE' }]
+    },
+    menu:[
+      { category:'Bowls', items:[
+        { _id:'h1', name:'Buddha Bowl',        isVeg:true, isPopular:true,  isBestseller:true,  price:299, rating:4.6, calories:480, preparationTime:12, description:'Quinoa, roasted veggies, avocado, chickpeas with tahini dressing.', image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' },
+        { _id:'h2', name:'Protein Power Bowl', isVeg:true, isPopular:true,  isBestseller:false, price:319, rating:4.5, calories:520, preparationTime:12, description:'Brown rice, tofu, edamame, kale, nuts with ginger-sesame sauce.',     image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' },
+        { _id:'h3', name:'Mediterranean Bowl', isVeg:true, isPopular:false, isBestseller:false, price:279, rating:4.4, calories:440, preparationTime:10, description:'Couscous, hummus, roasted peppers, olives and feta cheese.',         image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' }
+      ]},
+      { category:'Salads', items:[
+        { _id:'h4', name:'Caesar Salad',       isVeg:true, isPopular:true, isBestseller:true,  price:229, rating:4.5, calories:320, preparationTime:8, description:'Romaine lettuce, croutons, parmesan with classic Caesar dressing.', image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' },
+        { _id:'h5', name:'Greek Salad',        isVeg:true, isPopular:false,isBestseller:false, price:209, rating:4.3, calories:280, preparationTime:8, description:'Cucumber, tomatoes, olives, feta with extra-virgin olive oil.',      image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' }
+      ]},
+      { category:'Smoothies', items:[
+        { _id:'h6', name:'Green Detox Smoothie', isVeg:true, isPopular:true, isBestseller:true,  price:179, rating:4.7, calories:180, preparationTime:5, description:'Spinach, banana, apple, ginger and coconut water blend.',    image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { _id:'h7', name:'Berry Blast Smoothie', isVeg:true, price:169, rating:4.5, calories:200, preparationTime:5, description:'Mixed berries, yoghurt, honey and chia seeds blend.', image:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' }
+      ]}
+    ],
+    reviews:[
+      { user:{ name:'Nisha T.' }, rating:5, comment:'Best healthy food in the city! Buddha bowl is so filling and delicious.', createdAt: new Date(Date.now()-43200000) },
+      { user:{ name:'Manish K.' }, rating:4, comment:'Love the concept. Green smoothie is refreshing and nutrient-packed.', createdAt: new Date(Date.now()-86400000) }
+    ]
+  }
+
+}; /* end DEMO_DB */
+
+/* Helper: get demo data by restaurant ID */
+function getDemoById(id) {
+  /* Direct match */
+  if (DEMO_DB[id]) return DEMO_DB[id];
+  /* Try slug — e.g. "the-burger-palace-1234567890" */
+  for (var key in DEMO_DB) {
+    var r = DEMO_DB[key].restaurant;
+    if (r.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').indexOf(id.substring(0,8).toLowerCase()) === 0) {
+      return DEMO_DB[key];
+    }
+  }
+  /* Fallback: first restaurant */
+  return DEMO_DB['demo1'];
+}
+
+/* ── State ─────────────────────────────────────────────────── */
+var currentMenu = [];
+var currentRestId = 'r1';
+var vegOnly = false;
+var itemMap = {};   // id -> item
+
+/* ── Init ──────────────────────────────────────────────────── */
+async function loadPage() {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id') || 'demo1';
+  try {
+    var res = await API.get('/restaurants/' + id);
+    buildItemMap(res.data.menu);
+    currentRestId = res.data.restaurant._id;
+    currentMenu   = res.data.menu;
+    renderBanner(res.data.restaurant);
+    renderInfo(res.data.restaurant);
+    renderMenu(res.data.menu);
+    renderReviews(res.data.reviews);
+  } catch(e) {
+    var demo = getDemoById(id);
+    buildItemMap(demo.menu);
+    currentRestId = demo.restaurant._id;
+    currentMenu   = demo.menu;
+    renderBanner(demo.restaurant);
+    renderInfo(demo.restaurant);
+    renderMenu(demo.menu);
+    renderReviews(demo.reviews);
+  }
+}
+
+function buildItemMap(menu) {
+  itemMap = {};
+  menu.forEach(function(sec) {
+    sec.items.forEach(function(item) { itemMap[item._id] = item; });
+  });
+}
+
+/* ── Banner ────────────────────────────────────────────────── */
+function renderBanner(r) {
+  document.title = r.name + ' — Foodie Express';
+  var img = document.getElementById('banner-img');
+  if (img) img.src = r.banner || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200';
+  var nameEl = document.getElementById('rest-name');
+  if (nameEl) nameEl.textContent = r.name;
+  var cuisEl = document.getElementById('rest-cuisines');
+  if (cuisEl) cuisEl.textContent = (r.cuisines || []).join(' • ');
+  var badges = document.getElementById('rest-badges');
+  if (badges) badges.innerHTML =
+    '<span class="banner-badge">⭐ ' + r.rating + ' (' + (r.totalRatings||0).toLocaleString() + ')</span>' +
+    '<span class="banner-badge">🕐 ' + r.deliveryTime + ' min</span>' +
+    '<span class="banner-badge">' + (r.isOpen ? '🟢 Open' : '🔴 Closed') + '</span>' +
+    (r.isPureVeg ? '<span class="banner-badge">🌿 Pure Veg</span>' : '');
+}
+
+/* ── Info Sidebar ──────────────────────────────────────────── */
+function renderInfo(r) {
+  var el = document.getElementById('rest-info');
+  if (!el) return;
+  el.innerHTML =
+    infoRow('🚚 Delivery Fee',   r.deliveryFee === 0 ? 'FREE' : '₹' + r.deliveryFee) +
+    infoRow('⏱ Delivery Time',   r.deliveryTime + ' mins') +
+    infoRow('📦 Min. Order',     '₹' + (r.minOrder || 0)) +
+    infoRow('🎁 Free Delivery',  'Above ₹' + (r.freeDeliveryAbove || 0)) +
+    infoRow('📍 Address',        r.address && r.address.fullAddress ? r.address.fullAddress : 'N/A') +
+    infoRow('📞 Phone',          r.phone || 'N/A');
+
+  var offersEl = document.getElementById('rest-offers');
+  if (!offersEl) return;
+  if (r.offers && r.offers.length) {
+    offersEl.innerHTML = r.offers.map(function(o) {
+      return '<div style="background:rgba(255,107,43,0.07);border:1px dashed var(--orange);border-radius:var(--radius-md);padding:12px;margin-bottom:10px">' +
+        '<div style="font-weight:700;font-size:0.9rem;color:var(--orange)">' + (o.title||'') + '</div>' +
+        '<div style="font-size:0.8rem;color:var(--text-secondary);margin:4px 0">' + (o.description||'') + '</div>' +
+        '<code style="font-size:0.8rem;font-weight:700;letter-spacing:1px;color:var(--orange)">' + (o.code||'') + '</code></div>';
+    }).join('');
+  }
+}
+
+function infoRow(label, value) {
+  return '<div class="info-row"><span class="lbl">' + label + '</span><span class="val">' + value + '</span></div>';
+}
+
+/* ── Menu ──────────────────────────────────────────────────── */
+function applyVegFilter() {
+  vegOnly = document.getElementById('veg-only').checked;
+  renderMenu(currentMenu);
+}
+
+function renderMenu(menu) {
+  /* Category nav */
+  var nav = document.getElementById('menu-nav');
+  if (nav) {
+    nav.innerHTML = menu.map(function(sec) {
+      var filtered = vegOnly ? sec.items.filter(function(i){ return i.isVeg; }) : sec.items;
+      if (!filtered.length) return '';
+      return '<button class="menu-nav-btn" onclick="scrollTo(\'' + sec.category + '\')">' + sec.category + '</button>';
+    }).join('');
+  }
+
+  /* Menu sections */
+  var container = document.getElementById('menu-container');
+  if (!container) return;
+  container.innerHTML = menu.map(function(sec) {
+    var items = vegOnly ? sec.items.filter(function(i){ return i.isVeg; }) : sec.items;
+    if (!items.length) return '';
+    var catKey = sec.category.replace(/\s+/g,'-');
+    return '<div class="menu-section" id="cat-' + catKey + '">' +
+      '<div class="menu-sec-header">' + getCatEmoji(sec.category) + ' ' + sec.category +
+        '<span style="color:var(--text-muted);font-weight:400;font-size:0.82rem;margin-left:auto">' + items.length + ' items</span>' +
+      '</div>' +
+      items.map(function(item) { return renderItem(item); }).join('') +
+    '</div>';
+  }).join('');
+}
+
+function renderItem(item) {
+  var price = item.discountedPrice || item.price;
+  var qty   = Cart.getQuantity(item._id);
+  return '<div class="menu-item">' +
+    '<div class="menu-item-body">' +
+      '<div class="menu-item-name">' +
+        '<span class="veg-dot ' + (item.isVeg ? 'veg' : 'nonveg') + '"></span>' +
+        '<span>' + esc(item.name) + '</span>' +
+        (item.isBestseller ? '<span class="tag-pill tag-best">BESTSELLER</span>' : '') +
+        (item.isPopular    ? '<span class="tag-pill tag-pop">POPULAR</span>' : '') +
+      '</div>' +
+      '<div class="menu-item-desc">' + esc(item.description || '') + '</div>' +
+      '<div class="menu-item-meta">' +
+        (item.rating          ? '<span>⭐ ' + item.rating + '</span>' : '') +
+        (item.calories        ? '<span>🔥 ' + item.calories + ' kcal</span>' : '') +
+        (item.preparationTime ? '<span>⏱ ' + item.preparationTime + ' min</span>' : '') +
+      '</div>' +
+      '<div class="menu-price-row">' +
+        '<div class="food-price">' +
+          '<span class="price-current">₹' + price + '</span>' +
+          (item.discountedPrice ? ' <span class="price-original">₹' + item.price + '</span>' : '') +
+        '</div>' +
+        '<div id="cc-' + item._id + '">' + buildControl(item._id, qty, price) + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<img class="menu-item-img" src="' + (item.image || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300') + '" alt="' + esc(item.name) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300\'">' +
+  '</div>';
+}
+
+function buildControl(id, qty, price) {
+  if (qty > 0) {
+    return '<div class="quantity-controls">' +
+      '<button class="qty-btn" data-id="' + id + '" data-action="dec" onclick="handleCart(this)">−</button>' +
+      '<span class="qty-count" id="qc-' + id + '">' + qty + '</span>' +
+      '<button class="qty-btn" data-id="' + id + '" data-action="inc" onclick="handleCart(this)">+</button>' +
+    '</div>';
+  }
+  return '<button class="add-to-cart-btn" data-id="' + id + '" data-price="' + price + '" onclick="handleAdd(this)">' +
+    '<span class="add-btn">+ ADD</span></button>';
+}
+
+/* Safe cart handlers — no URL in onclick */
+function handleAdd(btn) {
+  var id    = btn.getAttribute('data-id');
+  var price = parseFloat(btn.getAttribute('data-price'));
+  var item  = itemMap[id];
+  if (!item) return;
+  Cart.add({ foodItemId:id, name:item.name, image:item.image||'', price:price, restaurantId:currentRestId });
+  refreshControl(id, item.discountedPrice || item.price);
+}
+
+function handleCart(btn) {
+  var id     = btn.getAttribute('data-id');
+  var action = btn.getAttribute('data-action');
+  var item   = itemMap[id];
+  if (!item) return;
+  var current = Cart.getQuantity(id);
+  if (action === 'dec') Cart.updateQty(id, current - 1);
+  else                  Cart.updateQty(id, current + 1);
+  refreshControl(id, item.discountedPrice || item.price);
+}
+
+function refreshControl(id, price) {
+  var el = document.getElementById('cc-' + id);
+  if (!el) return;
+  el.innerHTML = buildControl(id, Cart.getQuantity(id), price);
+  var qc = document.getElementById('qc-' + id);
+  if (qc) qc.textContent = Cart.getQuantity(id);
+}
+
+/* ── Reviews ───────────────────────────────────────────────── */
+function renderReviews(reviews) {
+  var track = document.getElementById('reviews-track');
+  if (!track) return;
+  if (!reviews || !reviews.length) {
+    track.innerHTML = '<p style="color:var(--text-muted);padding:20px 0">No reviews yet. Be the first!</p>';
+    return;
+  }
+  track.innerHTML = reviews.map(function(r) {
+    var stars = '';
+    for (var i = 0; i < Math.min(r.rating, 5); i++) stars += '⭐';
+    var date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+    return '<div class="review-card">' +
+      '<div class="review-header">' +
+        '<div class="reviewer-avatar">' + (r.user && r.user.name ? r.user.name[0].toUpperCase() : 'U') + '</div>' +
+        '<div><div class="reviewer-name">' + esc(r.user && r.user.name ? r.user.name : 'Customer') + '</div>' +
+        '<div class="reviewer-location">' + date + '</div></div>' +
+      '</div>' +
+      '<div class="review-stars">' + stars + '</div>' +
+      '<p class="review-text">' + esc(r.comment || '') + '</p>' +
+    '</div>';
+  }).join('');
+}
+
+/* ── Helpers ───────────────────────────────────────────────── */
+function scrollTo(cat) {
+  var el = document.getElementById('cat-' + cat.replace(/\s+/g, '-'));
+  if (el) { var top = el.getBoundingClientRect().top + window.scrollY - 90; window.scrollTo({ top:top, behavior:'smooth' }); }
+  document.querySelectorAll('.menu-nav-btn').forEach(function(b) { b.classList.toggle('active', b.textContent.trim() === cat); });
+}
+
+function getCatEmoji(cat) {
+  var m = { Burgers:'🍔', Fries:'🍟', Drinks:'🥤', Desserts:'🍰', Pizza:'🍕', Pasta:'🍝',
+            Biryani:'🍛', 'Main Course':'🍲', Starters:'🥗', Breads:'🫓', Sides:'🥙', Soups:'🍜' };
+  return m[cat] || '🍽️';
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.addEventListener('DOMContentLoaded', loadPage);
+</script>
+</body>
+</html>

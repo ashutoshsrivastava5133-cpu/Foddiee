@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order — Foodie Express</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .track-page { padding-top:calc(var(--nav-height)+32px); padding-bottom:60px; }
+    .track-grid { display:grid; grid-template-columns:1fr 360px; gap:28px; margin-top:24px; }
+    .t-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:24px; margin-bottom:20px; }
+    .t-card h3 { font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:16px; }
+    .status-hero { background:linear-gradient(135deg,var(--orange),var(--coral)); border-radius:var(--radius-xl); padding:24px; color:#fff; text-align:center; margin-bottom:20px; }
+    .eta-num { font-family:var(--font-display); font-size:3rem; font-weight:800; line-height:1; }
+    .map-box { background:linear-gradient(135deg,#1a2a3a,#0d1520); border-radius:var(--radius-lg); height:280px; position:relative; overflow:hidden; margin-bottom:24px; display:flex; align-items:center; justify-content:center; }
+    .map-grid { position:absolute; inset:0; opacity:0.06; background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px); background-size:40px 40px; }
+    .map-road-v { position:absolute; width:3px; height:100%; background:rgba(255,255,255,0.07); left:50%; }
+    .map-road-h { position:absolute; height:3px; width:100%; background:rgba(255,255,255,0.07); top:50%; }
+    .map-bike { font-size:2rem; position:absolute; animation:bikeMove 5s ease-in-out infinite; }
+    @keyframes bikeMove { 0%{transform:translate(-60px,20px)} 30%{transform:translate(0,-30px)} 60%{transform:translate(50px,10px)} 100%{transform:translate(-60px,20px)} }
+    .map-pin-rest { position:absolute; bottom:30%; left:18%; font-size:1.5rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+    .map-pin-home { position:absolute; top:22%; right:16%; font-size:1.5rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+    .map-route { position:absolute; border:2px dashed rgba(255,107,43,0.45); border-radius:50%; width:55%; height:40%; top:28%; left:18%; }
+    .map-hint { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.35); font-size:0.72rem; white-space:nowrap; }
+    .steps-row { display:flex; justify-content:space-between; position:relative; margin:8px 0 24px; }
+    .steps-row::before { content:''; position:absolute; top:20px; left:8%; right:8%; height:2px; background:var(--border); z-index:0; }
+    .progress-fill { position:absolute; top:20px; left:8%; height:2px; background:linear-gradient(90deg,var(--orange),var(--coral)); z-index:1; transition:width 1s ease; }
+    .step { display:flex; flex-direction:column; align-items:center; gap:6px; z-index:2; }
+    .step-ic { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.1rem; border:2px solid var(--border); background:var(--bg-card); transition:all var(--transition); }
+    .step.done .step-ic  { background:linear-gradient(135deg,var(--orange),var(--coral)); border-color:var(--orange); color:#fff; }
+    .step.now  .step-ic  { border-color:var(--orange); box-shadow:0 0 0 4px rgba(255,107,43,0.15); animation:pulseStep 2s infinite; }
+    @keyframes pulseStep { 0%,100%{box-shadow:0 0 0 4px rgba(255,107,43,0.15)} 50%{box-shadow:0 0 0 8px rgba(255,107,43,0.07)} }
+    .step-lbl { font-size:0.72rem; font-weight:600; color:var(--text-secondary); text-align:center; }
+    .step.now .step-lbl { color:var(--orange); }
+    .timeline-item { display:flex; gap:14px; padding:10px 0; }
+    .tl-dot { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.9rem; }
+    .tl-dot.done { background:rgba(22,163,74,0.1); }
+    .tl-dot.now  { background:rgba(255,107,43,0.1); box-shadow:0 0 0 3px rgba(255,107,43,0.12); }
+    .tl-dot.pend { background:var(--bg-secondary); opacity:0.45; }
+    .tl-line { width:2px; height:20px; background:var(--border); margin:2px auto; }
+    .tl-line.done { background:#16A34A; }
+    .info-r { display:flex; justify-content:space-between; padding:6px 0; font-size:0.85rem; border-bottom:1px solid var(--border); }
+    .info-r:last-child { border-bottom:none; }
+    .stars-row { display:flex; gap:6px; margin-bottom:12px; }
+    .star-btn { font-size:1.8rem; cursor:pointer; transition:transform .2s; }
+    .star-btn:hover { transform:scale(1.2); }
+    @media(max-width:900px){ .track-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div id="loader"><div class="loader-logo">🍔 Foodie Express</div><div class="loader-progress"><div class="loader-bar"></div></div></div>
+
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="logo-icon">🍔</div>Foodie<span>Express</span></a>
+    <div style="flex:1"></div>
+    <div class="nav-actions">
+      <button class="theme-toggle">🌙</button>
+      <button class="btn btn-primary btn-sm" id="nav-login-btn">Login</button>
+      <div id="nav-user-menu" style="display:none;align-items:center;gap:8px">
+        <a href="dashboard.html" class="btn btn-ghost btn-sm">👤 <span id="nav-user-name"></span></a>
+        <button class="btn btn-ghost btn-sm" id="nav-logout">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="track-page">
+  <div class="container">
+    <a href="../index.html" style="color:var(--text-secondary);font-size:0.875rem">← Back to Home</a>
+    <h1 style="font-family:var(--font-display);font-weight:800;font-size:1.8rem;margin:12px 0">Track Your Order</h1>
+
+    <div class="track-grid">
+
+      <!-- LEFT -->
+      <div>
+        <!-- Status Hero -->
+        <div class="status-hero">
+          <div style="font-size:2rem;margin-bottom:8px">🛵</div>
+          <div style="font-size:0.9rem;opacity:.9;margin-bottom:4px">Estimated Delivery</div>
+          <div class="eta-num" id="eta-display">18 min</div>
+          <div style="font-size:0.85rem;opacity:.85;margin-top:6px" id="order-label">Order from Spice Garden · #FE1001</div>
+        </div>
+
+        <!-- Map -->
+        <div class="map-box">
+          <div class="map-grid"></div>
+          <div class="map-road-v"></div>
+          <div class="map-road-h"></div>
+          <div class="map-route"></div>
+          <div class="map-pin-rest" title="Restaurant">🏪</div>
+          <div class="map-pin-home" title="Your Location">🏠</div>
+          <div class="map-bike">🛵</div>
+          <div class="map-hint">Live tracking · Configure Google Maps API key in .env</div>
+        </div>
+
+        <!-- Steps -->
+        <div class="steps-row" id="steps-row">
+          <div class="progress-fill" id="progress-fill" style="width:75%"></div>
+          <div class="step done"><div class="step-ic">✅</div><div class="step-lbl">Placed</div></div>
+          <div class="step done"><div class="step-ic">✅</div><div class="step-lbl">Confirmed</div></div>
+          <div class="step done"><div class="step-ic">👨‍🍳</div><div class="step-lbl">Cooking</div></div>
+          <div class="step now" id="step-way"><div class="step-ic">🛵</div><div class="step-lbl">On Way</div></div>
+          <div class="step" id="step-done"><div class="step-ic">🎉</div><div class="step-lbl">Delivered</div></div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="t-card">
+          <h3>Order Timeline</h3>
+          <div class="timeline-item">
+            <div><div class="tl-dot done">✅</div><div class="tl-line done"></div></div>
+            <div><div style="font-weight:700;font-size:0.9rem">Order Placed</div><div style="font-size:0.8rem;color:var(--text-secondary)">Your order was placed successfully</div><div style="font-size:0.75rem;color:var(--text-muted)" id="t1"></div></div>
+          </div>
+          <div class="timeline-item">
+            <div><div class="tl-dot done">✅</div><div class="tl-line done"></div></div>
+            <div><div style="font-weight:700;font-size:0.9rem">Order Confirmed</div><div style="font-size:0.8rem;color:var(--text-secondary)">Restaurant accepted your order</div><div style="font-size:0.75rem;color:var(--text-muted)" id="t2"></div></div>
+          </div>
+          <div class="timeline-item">
+            <div><div class="tl-dot done">👨‍🍳</div><div class="tl-line done"></div></div>
+            <div><div style="font-weight:700;font-size:0.9rem">Preparing Your Food</div><div style="font-size:0.8rem;color:var(--text-secondary)">Chef is cooking your order fresh</div><div style="font-size:0.75rem;color:var(--text-muted)" id="t3"></div></div>
+          </div>
+          <div class="timeline-item">
+            <div><div class="tl-dot now">🛵</div><div class="tl-line"></div></div>
+            <div><div style="font-weight:700;font-size:0.9rem;color:var(--orange)">Out for Delivery</div><div style="font-size:0.8rem;color:var(--text-secondary)">Delivery partner heading to you</div><div style="font-size:0.75rem;color:var(--orange);font-weight:600">Now</div></div>
+          </div>
+          <div class="timeline-item" style="opacity:0.4">
+            <div><div class="tl-dot pend">🎉</div></div>
+            <div><div style="font-weight:700;font-size:0.9rem">Delivered</div><div style="font-size:0.8rem;color:var(--text-secondary)">Enjoy your meal!</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+        <!-- Delivery Partner -->
+        <div class="t-card">
+          <h3>🛵 Delivery Partner</h3>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--coral));display:flex;align-items:center;justify-content:center;font-size:1.4rem">🧑</div>
+            <div style="flex:1">
+              <div style="font-weight:700">Suresh Kumar</div>
+              <div style="font-size:0.82rem;color:var(--text-secondary)">⭐ 4.8 · 1,240 deliveries</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">🛵 MH 02 AB 1234</div>
+            </div>
+            <a href="tel:+919876543210" class="btn btn-outline btn-sm">📞</a>
+          </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="t-card">
+          <h3>📋 Order Details</h3>
+          <div id="order-detail-items">
+            <div class="info-r"><span>🍛 Chicken Biryani × 1</span><span>₹349</span></div>
+            <div class="info-r"><span>🫓 Garlic Naan × 2</span><span>₹98</span></div>
+            <div class="info-r"><span>🍮 Gulab Jamun × 1</span><span>₹99</span></div>
+          </div>
+          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+            <div class="info-r"><span style="color:var(--text-secondary)">Subtotal</span><span>₹546</span></div>
+            <div class="info-r"><span style="color:var(--text-secondary)">Delivery</span><span>₹25</span></div>
+            <div class="info-r"><span style="color:var(--text-secondary)">Taxes</span><span>₹27</span></div>
+            <div class="info-r" style="font-weight:800;font-size:1rem;color:var(--text-primary)"><span>Total Paid</span><span>₹598</span></div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="t-card">
+          <h3>📍 Delivery Address</h3>
+          <div style="font-weight:600;margin-bottom:4px">Home</div>
+          <div style="color:var(--text-secondary);font-size:0.875rem;line-height:1.6">123 Sample Street, Near City Mall<br>Lucknow, Uttar Pradesh — 226001</div>
+        </div>
+
+        <!-- Rating -->
+        <div class="t-card" id="rate-card" style="display:none">
+          <h3>⭐ Rate Your Order</h3>
+          <div class="stars-row" id="stars-row">
+            <span class="star-btn" onclick="setRating(1)">☆</span>
+            <span class="star-btn" onclick="setRating(2)">☆</span>
+            <span class="star-btn" onclick="setRating(3)">☆</span>
+            <span class="star-btn" onclick="setRating(4)">☆</span>
+            <span class="star-btn" onclick="setRating(5)">☆</span>
+          </div>
+          <textarea class="form-input" id="review-txt" rows="2" placeholder="Share your experience..."></textarea>
+          <button class="btn btn-primary w-full" style="justify-content:center;margin-top:10px" onclick="submitRating()">Submit Review</button>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <a href="../restaurants.html" class="btn btn-outline" style="flex:1;justify-content:center">Order Again</a>
+          <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="Toast.info('Support: 1800-FOODIE')">Get Help</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="modal-overlay" id="auth-modal"><div class="modal"><button class="modal-close">✕</button><div id="auth-modal-body"></div></div></div>
+
+<script src="../js/app.js"></script>
+<script>
+var etaMins = 18;
+var currentRating = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimestamps();
+  startETA();
+  loadFromUrl();
+});
+
+function setTimestamps() {
+  var now = Date.now();
+  var fmt = function(d) { return new Date(d).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); };
+  var t1 = document.getElementById('t1'); if (t1) t1.textContent = fmt(now - 28*60000);
+  var t2 = document.getElementById('t2'); if (t2) t2.textContent = fmt(now - 25*60000);
+  var t3 = document.getElementById('t3'); if (t3) t3.textContent = fmt(now - 18*60000);
+}
+
+function startETA() {
+  var el = document.getElementById('eta-display');
+  var iv = setInterval(function() {
+    if (etaMins <= 0) {
+      clearInterval(iv);
+      if (el) el.textContent = 'Delivered! 🎉';
+      var hw = document.querySelector('.status-hero');
+      if (hw) hw.style.background = 'linear-gradient(135deg,#16A34A,#15803d)';
+      var sw = document.getElementById('step-way');
+      var sd = document.getElementById('step-done');
+      var pf = document.getElementById('progress-fill');
+      if (sw) { sw.classList.remove('now'); sw.classList.add('done'); }
+      if (sd) sd.classList.add('done');
+      if (pf) pf.style.width = '100%';
+      var rc = document.getElementById('rate-card');
+      if (rc) rc.style.display = 'block';
+      Toast.success('Your order has been delivered! Enjoy your meal 🍽️');
+      return;
+    }
+    etaMins--;
+    if (el) el.textContent = etaMins + ' min';
+    var pf2 = document.getElementById('progress-fill');
+    if (pf2) pf2.style.width = (75 + (18-etaMins)/18*25) + '%';
+  }, 30000);
+}
+
+async function loadFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+  if (!id || !AppState.user) return;
+  try {
+    var res = await API.get('/orders/' + id);
+    var o = res.data;
+    var lbl = document.getElementById('order-label');
+    if (lbl) lbl.textContent = 'Order from ' + (o.restaurant && o.restaurant.name || 'Restaurant') + ' · #' + o.orderNumber;
+    if (o.items && o.items.length) {
+      var detEl = document.getElementById('order-detail-items');
+      if (detEl) detEl.innerHTML = o.items.map(function(item) {
+        return '<div class="info-r"><span>' + item.name + ' × ' + item.quantity + '</span><span>₹' + item.subtotal + '</span></div>';
+      }).join('');
+    }
+  } catch(e) {}
+}
+
+function setRating(val) {
+  currentRating = val;
+  document.querySelectorAll('.star-btn').forEach(function(s, i) {
+    s.textContent = i < val ? '⭐' : '☆';
+  });
+}
+
+function submitRating() {
+  if (!currentRating) { Toast.error('Please select a star rating'); return; }
+  Toast.success('Thank you for your review! 🙏');
+  document.getElementById('rate-card').innerHTML =
+    '<div style="text-align:center;padding:16px"><div style="font-size:2.5rem;margin-bottom:10px">🙏</div>' +
+    '<p style="font-family:var(--font-display);font-weight:700">Thanks for your feedback!</p></div>';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Dashboard — Foodie Express</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { background:var(--bg-secondary); }
+    .ow-wrap { display:flex; min-height:100vh; }
+    .ow-sidebar { width:220px; background:var(--bg-card); border-right:1px solid var(--border); position:fixed; top:0; left:0; bottom:0; overflow-y:auto; z-index:200; display:flex; flex-direction:column; }
+    .ow-logo { padding:20px 16px; border-bottom:1px solid var(--border); }
+    .ow-logo .brand { font-family:var(--font-display); font-weight:800; font-size:1rem; display:flex; align-items:center; gap:8px; }
+    .ow-logo .sub { font-size:0.75rem; color:var(--text-secondary); margin-top:2px; }
+    .ow-nav { padding:12px 0; flex:1; }
+    .ow-nav a { display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:0.85rem; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all .25s; border-left:3px solid transparent; text-decoration:none; margin-bottom:2px; }
+    .ow-nav a:hover,.ow-nav a.active { background:rgba(255,107,43,.06); color:var(--orange); border-left-color:var(--orange); }
+    .ow-nav .divider { border-top:1px solid var(--border); margin:8px 0; padding-top:4px; }
+    .ow-main { margin-left:220px; padding:28px; flex:1; }
+    .ow-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+    .ow-top h1 { font-family:var(--font-display); font-weight:800; font-size:1.4rem; }
+    .ow-section { display:none; }
+    .ow-section.active { display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+    .kpi-box { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:18px; }
+    .kpi-lbl { font-size:0.75rem; font-weight:600; color:var(--text-secondary); margin-bottom:5px; }
+    .kpi-val { font-family:var(--font-display); font-size:1.6rem; font-weight:800; color:var(--orange); }
+    .kpi-sub { font-size:0.75rem; color:#16A34A; margin-top:4px; }
+    .ow-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:22px; margin-bottom:18px; }
+    .ow-card h3 { font-family:var(--font-display); font-weight:800; font-size:0.95rem; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+    .live-orders { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+    .live-col-title { font-weight:700; font-size:0.85rem; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+    .live-order-card { border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; margin-bottom:10px; }
+    .live-order-card .on { font-weight:700; font-size:0.88rem; margin-bottom:4px; }
+    .live-order-card .oc { font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; }
+    .live-order-card .oi { font-size:0.78rem; margin-bottom:10px; line-height:1.5; }
+    .status-sel { padding:6px 10px; border:1.5px solid var(--border); border-radius:var(--radius-full); font-size:0.78rem; font-weight:600; background:var(--bg-card); color:var(--text-primary); outline:none; cursor:pointer; width:100%; }
+    .menu-item-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .menu-item-row:last-child { border-bottom:none; }
+    .menu-item-row img { width:52px; height:52px; border-radius:var(--radius-md); object-fit:cover; flex-shrink:0; }
+    .avail-toggle { position:relative; display:inline-block; width:38px; height:20px; }
+    .avail-toggle input { opacity:0; width:0; height:0; }
+    .at-slider { position:absolute; inset:0; border-radius:20px; background:var(--border); cursor:pointer; transition:.3s; }
+    .at-slider::before { content:''; position:absolute; width:14px; height:14px; left:3px; top:3px; border-radius:50%; background:#fff; transition:.3s; }
+    input:checked + .at-slider { background:#16A34A; }
+    input:checked + .at-slider::before { transform:translateX(18px); }
+    .add-form { display:none; background:var(--bg-secondary); border-radius:var(--radius-lg); padding:18px; margin-bottom:18px; }
+    .add-form.open { display:block; }
+    .f3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .f2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .bar-chart { display:flex; flex-direction:column; gap:8px; }
+    .bar-item { display:flex; align-items:center; gap:10px; font-size:0.82rem; }
+    .bar-lbl { width:90px; color:var(--text-secondary); flex-shrink:0; }
+    .bar-track { flex:1; height:7px; background:var(--bg-secondary); border-radius:7px; overflow:hidden; }
+    .bar-fill { height:100%; background:linear-gradient(90deg,var(--orange),var(--coral)); border-radius:7px; }
+    .bar-val { width:50px; text-align:right; font-weight:700; font-size:0.78rem; }
+    .tag-veg   { background:rgba(22,163,74,.1);  color:#16A34A; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:3px; }
+    .tag-nonveg{ background:rgba(255,71,87,.1);  color:var(--coral); font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:3px; }
+    .tag-best  { background:rgba(255,179,71,.15); color:#D97706; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:var(--radius-full); }
+    @media(max-width:900px){ .ow-sidebar { display:none; } .ow-main { margin-left:0; } .kpi-row { grid-template-columns:1fr 1fr; } .live-orders { grid-template-columns:1fr; } .f3 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="loader"><div class="loader-logo">🏪 Owner Dashboard</div><div class="loader-progress"><div class="loader-bar"></div></div></div>
+
+<div class="ow-wrap">
+  <!-- SIDEBAR -->
+  <div class="ow-sidebar">
+    <div class="ow-logo">
+      <div class="brand">🏪 Owner Panel</div>
+      <div class="sub" id="rest-name-side">Loading...</div>
+    </div>
+    <div class="ow-nav">
+      <a class="active" onclick="showOwnerSec('overview',this)">📊 Overview</a>
+      <a onclick="showOwnerSec('orders',this)">📦 Live Orders</a>
+      <a onclick="showOwnerSec('menu',this)">🍽️ Menu Items</a>
+      <a onclick="showOwnerSec('analytics',this)">📈 Analytics</a>
+      <a onclick="showOwnerSec('profile',this)">⚙️ Settings</a>
+      <a onclick="showOwnerSec('reviews',this)">⭐ Reviews</a>
+      <div class="divider"></div>
+      <a onclick="toggleOpen()">🔴 <span id="open-txt">Mark as Closed</span></a>
+      <a href="../index.html">🌐 View Live Site</a>
+      <a onclick="Auth.logout();window.location.href='../index.html'" style="color:var(--coral)">🚪 Logout</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="ow-main">
+
+    <!-- OVERVIEW -->
+    <div class="ow-section active" id="ow-overview">
+      <div class="ow-top">
+        <div>
+          <h1 id="rest-name-main">Spice Garden</h1>
+          <p style="color:var(--text-secondary);font-size:0.85rem">Restaurant Owner Dashboard</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="theme-toggle" style="width:38px;height:38px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer">🌙</button>
+          <div id="open-badge" style="background:rgba(22,163,74,.1);color:#16A34A;border-radius:var(--radius-full);padding:6px 14px;font-size:0.82rem;font-weight:700">🟢 Open Now</div>
+        </div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-box"><div class="kpi-lbl">Today's Orders</div><div class="kpi-val">24</div><div class="kpi-sub">↑ 4 more than yesterday</div></div>
+        <div class="kpi-box"><div class="kpi-lbl">Today's Revenue</div><div class="kpi-val">₹8.2K</div><div class="kpi-sub">↑ 18% vs yesterday</div></div>
+        <div class="kpi-box"><div class="kpi-lbl">Avg Rating</div><div class="kpi-val">4.7⭐</div><div class="kpi-sub">From 2,100 reviews</div></div>
+        <div class="kpi-box"><div class="kpi-lbl">Pending Orders</div><div class="kpi-val" style="color:var(--coral)">3</div><div class="kpi-sub" style="color:var(--coral)">Needs attention!</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="ow-card">
+          <h3>📦 Recent Orders</h3>
+          <div>
+            <div class="live-order-card">
+              <div class="on">#FE1003 · Rahul Gupta</div>
+              <div class="oc">Chicken Biryani × 1, Garlic Naan × 2 · <strong style="color:var(--orange)">₹447</strong></div>
+              <select class="status-sel" onchange="Toast.success('Status updated to: ' + this.value)">
+                <option>Confirmed</option><option selected>Preparing</option><option>Ready</option><option>Picked Up</option>
+              </select>
+            </div>
+            <div class="live-order-card">
+              <div class="on">#FE1001 · Aarav Sharma</div>
+              <div class="oc">Butter Chicken × 2, Dal Makhani × 1 · <strong style="color:var(--orange)">₹877</strong></div>
+              <select class="status-sel" onchange="Toast.success('Status updated to: ' + this.value)">
+                <option>Confirmed</option><option>Preparing</option><option selected>Ready</option><option>Picked Up</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="ow-card">
+          <h3>🔥 Top Selling</h3>
+          <div class="bar-chart">
+            <div class="bar-item"><span class="bar-lbl">Chicken Biryani</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">1,800</span></div>
+            <div class="bar-item"><span class="bar-lbl">Butter Chicken</span> <div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="bar-val">1,450</span></div>
+            <div class="bar-item"><span class="bar-lbl">Paneer Tikka</span>   <div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="bar-val">1,200</span></div>
+            <div class="bar-item"><span class="bar-lbl">Garlic Naan</span>    <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">2,100</span></div>
+            <div class="bar-item"><span class="bar-lbl">Dal Makhani</span>    <div class="bar-track"><div class="bar-fill" style="width:49%"></div></div><span class="bar-val">890</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE ORDERS -->
+    <div class="ow-section" id="ow-orders">
+      <div class="ow-top"><h1>📦 Live Orders</h1><button class="btn btn-outline btn-sm" onclick="Toast.info('Refreshed!')">🔄 Refresh</button></div>
+      <div class="live-orders">
+        <div>
+          <div class="live-col-title" style="color:var(--coral)">🔴 Pending (2)</div>
+          <div class="live-order-card">
+            <div class="on">#FE1005 · Sneha Joshi</div>
+            <div class="oc">2 min ago · ₹720</div>
+            <div class="oi">Dal Makhani × 2, Garlic Naan × 4, Gulab Jamun × 2</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" style="flex:1" onclick="acceptOrder(this,'FE1005')">✅ Accept</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--coral)" onclick="rejectOrder(this,'FE1005')">❌ Reject</button>
+            </div>
+          </div>
+          <div class="live-order-card">
+            <div class="on">#FE1007 · Anjali Singh</div>
+            <div class="oc">5 min ago · ₹348</div>
+            <div class="oi">Butter Chicken × 1, Garlic Naan × 3</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" style="flex:1" onclick="acceptOrder(this,'FE1007')">✅ Accept</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--coral)" onclick="rejectOrder(this,'FE1007')">❌ Reject</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="live-col-title" style="color:#D97706">🟡 Preparing (2)</div>
+          <div class="live-order-card">
+            <div class="on">#FE1003 · Rahul Gupta</div>
+            <div class="oc">12 min ago · ₹447</div>
+            <div class="oi">Chicken Biryani × 1, Garlic Naan × 2</div>
+            <button class="btn btn-primary btn-sm w-full" onclick="markReady(this,'FE1003')">👨‍🍳 Mark as Ready</button>
+          </div>
+          <div class="live-order-card">
+            <div class="on">#FE1002 · Priya Patel</div>
+            <div class="oc">18 min ago · ₹598</div>
+            <div class="oi">Paneer Tikka × 2, Dal Makhani × 1, Naan × 3</div>
+            <button class="btn btn-primary btn-sm w-full" onclick="markReady(this,'FE1002')">👨‍🍳 Mark as Ready</button>
+          </div>
+        </div>
+        <div>
+          <div class="live-col-title" style="color:#16A34A">🟢 Ready (1)</div>
+          <div class="live-order-card">
+            <div class="on">#FE1001 · Aarav Sharma</div>
+            <div class="oc">25 min ago · ₹877</div>
+            <div class="oi">Butter Chicken × 2, Dal Makhani × 1</div>
+            <div style="background:rgba(22,163,74,.08);color:#16A34A;padding:8px;border-radius:var(--radius-sm);text-align:center;font-size:0.82rem;font-weight:600">⏳ Waiting for pickup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU -->
+    <div class="ow-section" id="ow-menu">
+      <div class="ow-top"><h1>🍽️ Menu Management</h1><button class="btn btn-primary" onclick="toggleAddForm()">+ Add New Item</button></div>
+      <div class="add-form" id="add-form">
+        <h3 style="font-family:var(--font-display);font-weight:800;margin-bottom:16px">Add Menu Item</h3>
+        <div class="f2" style="margin-bottom:12px">
+          <div class="form-group"><label class="form-label">Item Name *</label><input type="text" class="form-input" id="mi-name" placeholder="e.g. Chicken Tikka Masala"></div>
+          <div class="form-group"><label class="form-label">Category *</label>
+            <select class="form-input" id="mi-cat"><option>Starters</option><option>Main Course</option><option>Biryani</option><option>Breads</option><option>Desserts</option><option>Drinks</option><option>Sides</option></select>
+          </div>
+        </div>
+        <div class="f3" style="margin-bottom:12px">
+          <div class="form-group"><label class="form-label">Price (₹) *</label><input type="number" class="form-input" id="mi-price" placeholder="249"></div>
+          <div class="form-group"><label class="form-label">Discounted Price</label><input type="number" class="form-input" id="mi-disc" placeholder="Optional"></div>
+          <div class="form-group"><label class="form-label">Type</label>
+            <select class="form-input" id="mi-veg"><option value="true">🟢 Vegetarian</option><option value="false">🔴 Non-Veg</option></select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px"><label class="form-label">Description</label><textarea class="form-input" id="mi-desc" rows="2" placeholder="Describe the dish..."></textarea></div>
+        <div class="f2" style="margin-bottom:12px">
+          <div class="form-group"><label class="form-label">Image URL</label><input type="url" class="form-input" id="mi-img" placeholder="https://..."></div>
+          <div class="form-group"><label class="form-label">Prep Time (min)</label><input type="number" class="form-input" id="mi-prep" placeholder="15"></div>
+        </div>
+        <div style="display:flex;gap:14px;margin-bottom:14px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem"><input type="checkbox" id="mi-pop" style="accent-color:var(--orange)"> 🔥 Popular</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem"><input type="checkbox" id="mi-best" style="accent-color:var(--orange)"> ⭐ Bestseller</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem"><input type="checkbox" id="mi-spicy" style="accent-color:var(--orange)"> 🌶️ Spicy</label>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveMenuItem()">Save Item</button>
+          <button class="btn btn-ghost" onclick="toggleAddForm()">Cancel</button>
+        </div>
+      </div>
+      <div class="ow-card">
+        <h3>All Menu Items <select class="sort-select" style="font-size:0.78rem" onchange="Toast.info('Filter by: ' + this.value)"><option value="">All Categories</option><option>Starters</option><option>Main Course</option><option>Biryani</option><option>Breads</option><option>Desserts</option></select></h3>
+        <div id="menu-list">
+          <div class="menu-item-row">
+            <img src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=52" alt="Paneer Tikka" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=52'">
+            <div style="flex:1"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px"><span style="font-weight:700;font-size:0.9rem">Paneer Tikka</span><span class="tag-veg">VEG</span><span class="tag-best">BESTSELLER</span></div><div style="font-size:0.78rem;color:var(--text-secondary)">Starters · ₹249 · ⭐ 4.7</div></div>
+            <div style="display:flex;align-items:center;gap:10px"><label class="avail-toggle"><input type="checkbox" checked onchange="toggleAvail('paneer-tikka',this)"><span class="at-slider"></span></label><button class="btn btn-ghost btn-sm" onclick="Toast.info('Edit item form')">✏️</button><button class="btn btn-ghost btn-sm" style="color:var(--coral)" onclick="deleteItem(this)">🗑️</button></div>
+          </div>
+          <div class="menu-item-row">
+            <img src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=52" alt="Butter Chicken" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=52'">
+            <div style="flex:1"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px"><span style="font-weight:700;font-size:0.9rem">Butter Chicken</span><span class="tag-nonveg">NON-VEG</span></div><div style="font-size:0.78rem;color:var(--text-secondary)">Main Course · ₹329 · ⭐ 4.8</div></div>
+            <div style="display:flex;align-items:center;gap:10px"><label class="avail-toggle"><input type="checkbox" checked onchange="toggleAvail('butter-chicken',this)"><span class="at-slider"></span></label><button class="btn btn-ghost btn-sm">✏️</button><button class="btn btn-ghost btn-sm" style="color:var(--coral)" onclick="deleteItem(this)">🗑️</button></div>
+          </div>
+          <div class="menu-item-row">
+            <img src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=52" alt="Chicken Biryani" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=52'">
+            <div style="flex:1"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px"><span style="font-weight:700;font-size:0.9rem">Chicken Biryani</span><span class="tag-nonveg">NON-VEG</span><span class="tag-best">BESTSELLER</span></div><div style="font-size:0.78rem;color:var(--text-secondary)">Biryani · ₹349 · ⭐ 4.9</div></div>
+            <div style="display:flex;align-items:center;gap:10px"><label class="avail-toggle"><input type="checkbox" checked onchange="toggleAvail('chicken-biryani',this)"><span class="at-slider"></span></label><button class="btn btn-ghost btn-sm">✏️</button><button class="btn btn-ghost btn-sm" style="color:var(--coral)" onclick="deleteItem(this)">🗑️</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="ow-section" id="ow-analytics">
+      <div class="ow-top"><h1>📈 Analytics</h1></div>
+      <div class="kpi-row">
+        <div class="kpi-box"><div class="kpi-lbl">This Week</div><div class="kpi-val">₹47.6K</div><div class="kpi-sub">↑ 14% vs last week</div></div>
+        <div class="kpi-box"><div class="kpi-lbl">This Month</div><div class="kpi-val">₹1.28L</div><div class="kpi-sub">↑ 22% vs last month</div></div>
+        <div class="kpi-box"><div class="kpi-lbl">Total Orders</div><div class="kpi-val">1,800</div><div class="kpi-sub">Since joining</div></div>
+        <div class="kpi-box"><div class="kpi-lbl">Avg Order Value</div><div class="kpi-val">₹711</div><div class="kpi-sub">↑ 8% this month</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="ow-card">
+          <h3>Revenue by Day (Week)</h3>
+          <div class="bar-chart">
+            <div class="bar-item"><span class="bar-lbl">Monday</span>   <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">₹6.2K</span></div>
+            <div class="bar-item"><span class="bar-lbl">Tuesday</span>  <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="bar-val">₹7.9K</span></div>
+            <div class="bar-item"><span class="bar-lbl">Wednesday</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div><span class="bar-val">₹5.4K</span></div>
+            <div class="bar-item"><span class="bar-lbl">Thursday</span> <div class="bar-track"><div class="bar-fill" style="width:87%"></div></div><span class="bar-val">₹9.9K</span></div>
+            <div class="bar-item"><span class="bar-lbl">Friday</span>   <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">₹11.3K</span></div>
+            <div class="bar-item"><span class="bar-lbl">Saturday</span> <div class="bar-track"><div class="bar-fill" style="width:84%"></div></div><span class="bar-val">₹9.6K</span></div>
+            <div class="bar-item"><span class="bar-lbl">Sunday</span>   <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span class="bar-val">₹10.2K</span></div>
+          </div>
+        </div>
+        <div class="ow-card">
+          <h3>Orders by Time</h3>
+          <div class="bar-chart">
+            <div class="bar-item"><span class="bar-lbl">Morning</span>  <div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-val">8%</span></div>
+            <div class="bar-item"><span class="bar-lbl">Noon</span>     <div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="bar-val">30%</span></div>
+            <div class="bar-item"><span class="bar-lbl">Afternoon</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span class="bar-val">14%</span></div>
+            <div class="bar-item"><span class="bar-lbl">Evening</span>  <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">40%</span></div>
+            <div class="bar-item"><span class="bar-lbl">Night</span>    <div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-val">8%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="ow-section" id="ow-profile">
+      <div class="ow-top"><h1>⚙️ Restaurant Settings</h1></div>
+      <div class="ow-card">
+        <h3>Basic Information</h3>
+        <div class="f2">
+          <div class="form-group"><label class="form-label">Restaurant Name</label><input type="text" class="form-input" value="Spice Garden"></div>
+          <div class="form-group"><label class="form-label">Phone</label><input type="text" class="form-input" value="9876543212"></div>
+          <div class="form-group"><label class="form-label">Cuisines (comma separated)</label><input type="text" class="form-input" value="North Indian, Biryani, Tandoor"></div>
+          <div class="form-group"><label class="form-label">Min Order (₹)</label><input type="number" class="form-input" value="250"></div>
+          <div class="form-group"><label class="form-label">Delivery Fee (₹)</label><input type="number" class="form-input" value="25"></div>
+          <div class="form-group"><label class="form-label">Free Delivery Above (₹)</label><input type="number" class="form-input" value="600"></div>
+        </div>
+        <div class="form-group" style="margin-top:12px"><label class="form-label">Description</label><textarea class="form-input" rows="3">Authentic North Indian cuisine with rich spices and flavors.</textarea></div>
+        <div class="form-group" style="margin-top:12px"><label class="form-label">Banner Image URL</label><input type="url" class="form-input" placeholder="https://..."></div>
+        <div style="display:flex;gap:10px;margin-top:18px"><button class="btn btn-primary" onclick="Toast.success('Restaurant settings saved!')">Save Changes</button><button class="btn btn-ghost">Reset</button></div>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="ow-section" id="ow-reviews">
+      <div class="ow-top"><h1>⭐ Customer Reviews</h1></div>
+      <div style="display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:start">
+        <div class="ow-card" style="text-align:center">
+          <div style="font-size:3rem;font-weight:800;color:var(--orange);font-family:var(--font-display)">4.7</div>
+          <div style="color:var(--gold);font-size:1rem;margin:4px 0">⭐⭐⭐⭐⭐</div>
+          <div style="color:var(--text-secondary);font-size:0.8rem">2,100 reviews</div>
+          <div style="margin-top:14px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:0.78rem"><span>5⭐</span><div style="flex:1;height:5px;background:var(--bg-secondary);border-radius:5px;overflow:hidden"><div style="height:100%;width:70%;background:var(--gold)"></div></div><span>70%</span></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:0.78rem"><span>4⭐</span><div style="flex:1;height:5px;background:var(--bg-secondary);border-radius:5px;overflow:hidden"><div style="height:100%;width:20%;background:var(--gold)"></div></div><span>20%</span></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:0.78rem"><span>3⭐</span><div style="flex:1;height:5px;background:var(--bg-secondary);border-radius:5px;overflow:hidden"><div style="height:100%;width:7%;background:var(--gold)"></div></div><span>7%</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><span>1-2⭐</span><div style="flex:1;height:5px;background:var(--bg-secondary);border-radius:5px;overflow:hidden"><div style="height:100%;width:3%;background:var(--coral)"></div></div><span>3%</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="review-card" style="margin-bottom:12px">
+            <div class="review-header"><div class="reviewer-avatar">A</div><div><div class="reviewer-name">Aarav Sharma</div><div class="reviewer-location">3 days ago</div></div><span class="pill pill-g" style="margin-left:auto">⭐ 5</span></div>
+            <div class="review-stars">⭐⭐⭐⭐⭐</div>
+            <p class="review-text">Absolutely incredible biryani! Perfect flavors and generous portions. Fast delivery too!</p>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="font-size:0.8rem;font-weight:700;margin-bottom:6px;color:var(--orange)">Reply as Owner:</div>
+              <textarea class="form-input" rows="2" placeholder="Thank you for your review..." style="font-size:0.82rem" id="reply-1"></textarea>
+              <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="postReply('reply-1',this)">Send Reply</button>
+            </div>
+          </div>
+          <div class="review-card">
+            <div class="review-header"><div class="reviewer-avatar">P</div><div><div class="reviewer-name">Priya Mehta</div><div class="reviewer-location">1 week ago</div></div><span class="pill pill-g" style="margin-left:auto">⭐ 4</span></div>
+            <div class="review-stars">⭐⭐⭐⭐</div>
+            <p class="review-text">Great food! Paneer Tikka was amazing. Slight delivery delay but the food quality made up for it.</p>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="font-size:0.8rem;font-weight:700;margin-bottom:6px;color:var(--orange)">Reply as Owner:</div>
+              <textarea class="form-input" rows="2" placeholder="Thank you for your feedback..." style="font-size:0.82rem" id="reply-2"></textarea>
+              <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="postReply('reply-2',this)">Send Reply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="auth-modal"><div class="modal"><button class="modal-close">✕</button><div id="auth-modal-body"></div></div></div>
+
+<script src="../js/app.js"></script>
+<script>
+var restOpen = true;
+
+document.addEventListener('DOMContentLoaded', function() {
+  var u = AppState.user;
+  if (u && u.name) {
+    var s = document.getElementById('rest-name-side'); if (s) s.textContent = 'by ' + u.name;
+  }
+});
+
+function showOwnerSec(id, el) {
+  document.querySelectorAll('.ow-section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.ow-nav a').forEach(function(a){ a.classList.remove('active'); });
+  var sec = document.getElementById('ow-'+id); if (sec) sec.classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function toggleOpen() {
+  restOpen = !restOpen;
+  var badge = document.getElementById('open-badge');
+  var txt   = document.getElementById('open-txt');
+  if (restOpen) {
+    badge.style.background = 'rgba(22,163,74,.1)'; badge.style.color = '#16A34A'; badge.textContent = '🟢 Open Now';
+    txt.textContent = 'Mark as Closed';
+    Toast.success('Restaurant is now Open for orders');
+  } else {
+    badge.style.background = 'rgba(239,68,68,.1)'; badge.style.color = '#EF4444'; badge.textContent = '🔴 Closed';
+    txt.textContent = 'Mark as Open';
+    Toast.info('Restaurant is now Closed');
+  }
+}
+
+function acceptOrder(btn, id) {
+  btn.textContent = '✅ Accepted'; btn.disabled = true;
+  btn.closest('.live-order-card').style.borderColor = '#16A34A';
+  Toast.success('Order #' + id + ' accepted!');
+}
+
+function rejectOrder(btn, id) {
+  if (!confirm('Reject order #' + id + '?')) return;
+  btn.closest('.live-order-card').style.opacity = '0.4';
+  Toast.info('Order #' + id + ' rejected');
+}
+
+function markReady(btn, id) {
+  btn.textContent = '✅ Ready!'; btn.disabled = true; btn.style.background = '#16A34A';
+  Toast.success('Order #' + id + ' marked as ready for pickup!');
+}
+
+function toggleAddForm() {
+  document.getElementById('add-form').classList.toggle('open');
+}
+
+function saveMenuItem() {
+  var name = (document.getElementById('mi-name').value || '').trim();
+  if (!name) { Toast.error('Item name is required'); return; }
+  Toast.success('Menu item "' + name + '" added!');
+  toggleAddForm();
+  document.getElementById('mi-name').value = '';
+}
+
+function toggleAvail(id, cb) {
+  Toast.info('Item ' + (cb.checked ? 'enabled' : 'disabled'));
+}
+
+function deleteItem(btn) {
+  if (!confirm('Delete this menu item?')) return;
+  btn.closest('.menu-item-row').remove();
+  Toast.success('Menu item deleted');
+}
+
+function postReply(textareaId, btn) {
+  var txt = (document.getElementById(textareaId).value || '').trim();
+  if (!txt) { Toast.error('Write a reply first'); return; }
+  Toast.success('Reply posted!');
+  btn.textContent = '✅ Replied'; btn.disabled = true;
+  document.getElementById(textareaId).disabled = true;
+}
+</script>
+</body>
+</html>

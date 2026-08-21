@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurants — Foodie Express</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <style>
+    .page-banner { padding: calc(var(--nav-height) + 32px) 0 32px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+    .results-info { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 20px; }
+    .sort-select { padding: 10px 16px; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: var(--radius-full); color: var(--text-primary); font-size: 0.875rem; outline: none; cursor: pointer; }
+    .no-results { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+    .no-results-icon { font-size: 4rem; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<div id="loader"><div class="loader-logo">🍔 Foodie Express</div><div class="loader-progress"><div class="loader-bar"></div></div></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🍔</div>Foodie<span>Express</span></a>
+    <button class="nav-location">📍 <span class="location-text">Lucknow</span> ▾</button>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="restaurants.html" class="active">Restaurants</a>
+      <a href="pages/offers.html">Offers</a>
+      <a href="pages/track.html">Track Order</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle">🌙</button>
+      <button class="cart-btn">🛒 Cart <span class="cart-count" style="display:none">0</span></button>
+      <button class="btn btn-primary btn-sm" id="nav-login-btn">Login</button>
+      <div id="nav-user-menu" style="display:none;align-items:center;gap:8px">
+        <a href="pages/dashboard.html" class="btn btn-ghost btn-sm">👤 <span id="nav-user-name"></span></a>
+        <button class="btn btn-ghost btn-sm" id="nav-logout">Logout</button>
+      </div>
+    </div>
+    <div class="hamburger"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">🏠 Home</a>
+  <a href="restaurants.html">🍽️ Restaurants</a>
+  <a href="pages/offers.html">🎁 Offers</a>
+  <a href="pages/dashboard.html">👤 My Account</a>
+</div>
+
+<!-- PAGE BANNER -->
+<div class="page-banner">
+  <div class="container">
+    <h1 style="font-size:2rem;font-weight:800;margin-bottom:8px">
+      Restaurants near <span class="gradient-text location-text">you</span>
+    </h1>
+    <p style="color:var(--text-secondary);margin-bottom:24px">Discover great food from top-rated restaurants</p>
+    <div class="search-filter-bar">
+      <div class="search-input-wrap" style="flex:1;min-width:240px;position:relative">
+        <span class="search-icon" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted)">🔍</span>
+        <input type="text" class="search-input" id="restaurant-search" placeholder="Search restaurants, cuisines..." style="padding-left:42px">
+      </div>
+      <select class="sort-select" id="sort-select">
+        <option value="">Sort: Recommended</option>
+        <option value="rating">⭐ Highest Rated</option>
+        <option value="deliveryTime">⏱ Fastest Delivery</option>
+        <option value="deliveryFee">💰 Lowest Delivery Fee</option>
+      </select>
+    </div>
+    <div class="filter-chips" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+      <button class="filter-chip active" data-filter="">All</button>
+      <button class="filter-chip" data-filter="rating4">⭐ 4.0+</button>
+      <button class="filter-chip" data-filter="rating45">⭐ 4.5+</button>
+      <button class="filter-chip" data-filter="veg">🟢 Pure Veg</button>
+      <button class="filter-chip" data-filter="fast">⚡ Under 30 min</button>
+      <button class="filter-chip" data-filter="free">🚚 Free Delivery</button>
+      <button class="filter-chip" data-filter="offers">🎁 Has Offers</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<section class="section">
+  <div class="container">
+    <p class="results-info" id="results-info"></p>
+    <div class="restaurants-grid" id="restaurants-grid"></div>
+    <div id="no-results" class="no-results" style="display:none">
+      <div class="no-results-icon">🍽️</div>
+      <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:8px">No restaurants found</h3>
+      <p>Try different filters or search terms</p>
+      <button class="btn btn-primary" style="margin-top:20px" onclick="resetFilters()">Clear All Filters</button>
+    </div>
+    <div style="text-align:center;margin-top:40px;display:none" id="load-more-wrap">
+      <button class="btn btn-outline btn-lg" onclick="showMore()">Load More Restaurants</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="padding:40px 0;background:var(--bg-secondary);border-top:1px solid var(--border)">
+  <div class="container footer-bottom" style="padding-top:0;border-top:none">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🍔</div>Foodie<span style="color:var(--orange)">Express</span></a>
+    <p style="color:var(--text-secondary);font-size:0.875rem">© 2025 Foodie Express. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- CART & AUTH -->
+<div id="cart-overlay"></div>
+<div id="cart-sidebar">
+  <div class="cart-header"><div class="cart-title">🛒 Your Cart</div><button class="cart-close">✕</button></div>
+  <div class="cart-items" id="cart-items"><div class="empty-cart"><div class="empty-icon">🛒</div><p>Your cart is empty</p></div></div>
+  <div class="cart-footer">
+    <div class="coupon-input-wrap"><input type="text" class="coupon-input" placeholder="COUPON CODE" style="text-transform:uppercase"><button class="btn btn-outline btn-sm" id="apply-coupon-btn">Apply</button></div>
+    <div class="cart-summary" id="cart-summary"></div>
+    <button class="btn btn-primary w-full" style="justify-content:center" id="checkout-btn">Checkout →</button>
+  </div>
+</div>
+<div class="modal-overlay" id="auth-modal"><div class="modal"><button class="modal-close">✕</button><div id="auth-modal-body"></div></div></div>
+<div id="toast-container"></div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="js/app.js"></script>
+<script>
+var DEMO_DATA = [
+  { _id:'demo1', name:'The Burger Palace', rating:4.5, totalRatings:1250, cuisines:['American','Burgers','Fast Food'], deliveryTime:25, deliveryFee:30, isPureVeg:false, isFeatured:true, banner:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600', offers:[{title:'20% OFF'}] },
+  { _id:'demo2', name:'Pizza Paradise',    rating:4.3, totalRatings:890,  cuisines:['Italian','Pizza'],               deliveryTime:35, deliveryFee:40, isPureVeg:true,  isFeatured:true, banner:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600' },
+  { _id:'demo3', name:'Spice Garden',      rating:4.7, totalRatings:2100, cuisines:['North Indian','Biryani'],        deliveryTime:40, deliveryFee:25, isPureVeg:false, isFeatured:true, banner:'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600' },
+  { _id:'demo4', name:'Sushi Spot',        rating:4.6, totalRatings:670,  cuisines:['Japanese','Sushi'],              deliveryTime:45, deliveryFee:0,  isPureVeg:false, isFeatured:false, banner:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600' },
+  { _id:'demo5', name:'Chinese Dragon',    rating:4.2, totalRatings:540,  cuisines:['Chinese','Noodles'],             deliveryTime:30, deliveryFee:20, isPureVeg:false, isFeatured:false, banner:'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600' },
+  { _id:'demo6', name:'The Dessert House', rating:4.8, totalRatings:980,  cuisines:['Desserts','Bakery','Cafe'],      deliveryTime:20, deliveryFee:15, isPureVeg:true,  isFeatured:false, banner:'https://images.unsplash.com/photo-1488477304112-4944851de03d?w=600', offers:[{title:'Buy 2 Get 1'}] },
+  { _id:'demo7', name:'Taco Fiesta',       rating:4.1, totalRatings:430,  cuisines:['Mexican','Tacos'],               deliveryTime:35, deliveryFee:35, isPureVeg:false, isFeatured:false, banner:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600' },
+  { _id:'demo8', name:'Health Bowl',       rating:4.4, totalRatings:320,  cuisines:['Healthy','Salads'],              deliveryTime:25, deliveryFee:0,  isPureVeg:true,  isFeatured:false, banner:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600' },
+];
+
+var allData = []; var shownCount = 6; var activeFilter = '';
+
+function init() {
+  // Read URL params
+  var params = new URLSearchParams(window.location.search);
+  var urlSearch  = params.get('search')  || '';
+  var urlCuisine = params.get('cuisine') || '';
+  if (urlSearch)  document.getElementById('restaurant-search').value = urlSearch;
+
+  document.getElementById('restaurant-search').addEventListener('input', render);
+  document.getElementById('sort-select').addEventListener('change', applySort);
+  document.querySelectorAll('.filter-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter || '';
+      shownCount = 6;
+      render();
+    });
+  });
+
+  fetchData(urlSearch, urlCuisine);
+}
+
+async function fetchData(search, cuisine) {
+  try {
+    var q = '?limit=50' + (search ? '&search=' + encodeURIComponent(search) : '') + (cuisine ? '&cuisine=' + encodeURIComponent(cuisine) : '');
+    var res = await API.get('/restaurants' + q);
+    allData = res.data && res.data.length ? res.data : DEMO_DATA;
+  } catch(e) {
+    allData = DEMO_DATA;
+  }
+  applySort();
+}
+
+function applySort() {
+  var sort = document.getElementById('sort-select').value;
+  var data = allData.slice();
+  if (sort === 'rating')       data.sort(function(a,b) { return b.rating - a.rating; });
+  if (sort === 'deliveryTime') data.sort(function(a,b) { return a.deliveryTime - b.deliveryTime; });
+  if (sort === 'deliveryFee')  data.sort(function(a,b) { return a.deliveryFee - b.deliveryFee; });
+  allData = data;
+  shownCount = 6;
+  render();
+}
+
+function render() {
+  var search = document.getElementById('restaurant-search').value.toLowerCase().trim();
+  var filtered = allData.filter(function(r) {
+    if (search) {
+      var match = r.name.toLowerCase().includes(search) || (r.cuisines || []).some(function(c) { return c.toLowerCase().includes(search); });
+      if (!match) return false;
+    }
+    if (activeFilter === 'rating4')  return r.rating >= 4;
+    if (activeFilter === 'rating45') return r.rating >= 4.5;
+    if (activeFilter === 'veg')      return r.isPureVeg;
+    if (activeFilter === 'fast')     return r.deliveryTime <= 30;
+    if (activeFilter === 'free')     return r.deliveryFee === 0;
+    if (activeFilter === 'offers')   return r.offers && r.offers.length > 0;
+    return true;
+  });
+
+  var grid    = document.getElementById('restaurants-grid');
+  var noRes   = document.getElementById('no-results');
+  var loadMore= document.getElementById('load-more-wrap');
+  var info    = document.getElementById('results-info');
+
+  info.textContent = filtered.length + ' restaurant' + (filtered.length !== 1 ? 's' : '') + ' found';
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    noRes.style.display  = 'block';
+    loadMore.style.display = 'none';
+    return;
+  }
+  noRes.style.display = 'none';
+  var toShow = filtered.slice(0, shownCount);
+  grid.innerHTML = toShow.map(RestaurantLoader.renderCard).join('');
+  loadMore.style.display = filtered.length > shownCount ? 'block' : 'none';
+}
+
+function showMore() { shownCount += 6; render(); }
+
+function resetFilters() {
+  document.getElementById('restaurant-search').value = '';
+  document.getElementById('sort-select').value = '';
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  document.querySelector('.filter-chip').classList.add('active');
+  activeFilter = ''; shownCount = 6;
+  fetchData('','');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

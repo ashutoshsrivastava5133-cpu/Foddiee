@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Foodie Express — Order delicious food from top restaurants near you. Fast delivery, great deals.">
+  <title>Foodie Express — Food Delivered Fast 🍔</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">🍔 Foodie Express</div>
+  <div class="loader-progress"><div class="loader-bar"></div></div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">🍔</div>Foodie<span>Express</span>
+    </a>
+    <button class="nav-location" title="Detect location">
+      📍 <span class="location-text">Detecting...</span> ▾
+    </button>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="restaurants.html">Restaurants</a>
+      <a href="pages/offers.html">Offers</a>
+      <a href="pages/track.html">Track Order</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" title="Toggle theme">🌙</button>
+      <button class="cart-btn" title="View cart">
+        🛒 Cart
+        <span class="cart-count" style="display:none">0</span>
+      </button>
+      <button class="btn btn-primary btn-sm" id="nav-login-btn">Login</button>
+      <div id="nav-user-menu" style="display:none;align-items:center;gap:8px">
+        <a href="pages/dashboard.html" class="btn btn-ghost btn-sm">👤 <span id="nav-user-name"></span></a>
+        <button class="btn btn-ghost btn-sm" id="nav-logout">Logout</button>
+      </div>
+    </div>
+    <div class="hamburger"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu">
+  <a href="index.html">🏠 Home</a>
+  <a href="restaurants.html">🍽️ Restaurants</a>
+  <a href="pages/offers.html">🎁 Offers</a>
+  <a href="pages/track.html">📍 Track Order</a>
+  <a href="pages/dashboard.html">👤 My Account</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-circle c1"></div>
+  <div class="hero-bg-circle c2"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow" data-aos="fade-up">🚀 India's Fastest Food Delivery</div>
+        <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
+          Crave it. Order it.<br>Get <span class="typing-text gradient-text">Burgers 🍔</span>
+        </h1>
+        <p class="hero-description" data-aos="fade-up" data-aos-delay="200">
+          Order from 500+ restaurants near you. Hot food delivered in 30 minutes or less. Always fresh, always fast.
+        </p>
+        <div class="hero-search" data-aos="fade-up" data-aos-delay="300">
+          <input type="text" placeholder="Search restaurants, cuisines, dishes..." aria-label="Search food">
+          <button id="voice-search-btn" class="btn btn-ghost btn-sm" title="Voice search">🎤</button>
+          <button class="btn btn-primary" type="button">Search</button>
+        </div>
+        <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
+          <div class="hero-stat">
+            <div class="value stat-number" data-target="500" data-suffix="+">0+</div>
+            <div class="label">Restaurants</div>
+          </div>
+          <div class="hero-stat">
+            <div class="value stat-number" data-target="30" data-suffix=" min">0 min</div>
+            <div class="label">Avg Delivery</div>
+          </div>
+          <div class="hero-stat">
+            <div class="value stat-number" data-target="50000" data-suffix="+">0+</div>
+            <div class="label">Happy Customers</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual" data-aos="zoom-in" data-aos-delay="200">
+        <div class="orbit-ring orbit-1">
+          <div class="food-bubble b1">🍔</div>
+          <div class="food-bubble b2">🍕</div>
+          <div class="food-bubble b3">🌮</div>
+          <div class="food-bubble b4">🍣</div>
+        </div>
+        <div class="orbit-ring orbit-2">
+          <div class="food-bubble b5">🍜</div>
+          <div class="food-bubble b6">🧁</div>
+        </div>
+        <div class="hero-center-circle">
+          <div class="center-emoji">🛵</div>
+          <div class="center-text">Order Now!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section id="categories" class="section-sm">
+  <div class="container">
+    <h2 class="section-title" data-aos="fade-up">What are you <span class="gradient-text">craving?</span></h2>
+    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Tap a category to explore</p>
+    <div class="categories-slider" data-aos="fade-up" data-aos-delay="200">
+      <div class="category-card active" data-category="all"><div class="category-icon">🍽️</div><span class="category-name">All</span></div>
+      <div class="category-card" data-category="Biryani"><div class="category-icon">🍛</div><span class="category-name">Biryani</span></div>
+      <div class="category-card" data-category="Burgers"><div class="category-icon">🍔</div><span class="category-name">Burgers</span></div>
+      <div class="category-card" data-category="Pizza"><div class="category-icon">🍕</div><span class="category-name">Pizza</span></div>
+      <div class="category-card" data-category="Sushi"><div class="category-icon">🍣</div><span class="category-name">Sushi</span></div>
+      <div class="category-card" data-category="North Indian"><div class="category-icon">🫕</div><span class="category-name">North Indian</span></div>
+      <div class="category-card" data-category="Chinese"><div class="category-icon">🥡</div><span class="category-name">Chinese</span></div>
+      <div class="category-card" data-category="Desserts"><div class="category-icon">🧁</div><span class="category-name">Desserts</span></div>
+      <div class="category-card" data-category="Healthy"><div class="category-icon">🥗</div><span class="category-name">Healthy</span></div>
+      <div class="category-card" data-category="Tacos"><div class="category-icon">🌮</div><span class="category-name">Tacos</span></div>
+      <div class="category-card" data-category="Drinks"><div class="category-icon">🧃</div><span class="category-name">Drinks</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED RESTAURANTS -->
+<section id="featured" class="section">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px" data-aos="fade-up">
+      <div>
+        <h2 class="section-title">Top <span class="gradient-text">Restaurants</span></h2>
+        <p style="color:var(--text-secondary)">Handpicked for quality and speed</p>
+      </div>
+      <a href="restaurants.html" class="btn btn-outline">View All →</a>
+    </div>
+    <div class="restaurants-grid" id="featured-restaurants"></div>
+  </div>
+</section>
+
+<!-- OFFERS BANNER -->
+<section id="offers" class="section-sm">
+  <div class="offers-bg-pattern"></div>
+  <div class="container">
+    <h2 class="section-title text-center" style="color:white;margin-bottom:8px" data-aos="fade-up">🔥 Hot Deals & Offers</h2>
+    <p style="color:rgba(255,255,255,0.85);text-align:center;margin-bottom:40px" data-aos="fade-up">Use codes at checkout for instant savings</p>
+    <div class="offers-grid" data-aos="fade-up" data-aos-delay="100">
+      <div class="offer-card">
+        <div class="offer-emoji">🎉</div>
+        <div>
+          <div style="font-weight:800;font-size:1.1rem">WELCOME OFFER</div>
+          <div style="font-size:0.875rem;opacity:0.9;margin:4px 0">₹50 off on your first order</div>
+          <div class="offer-code">WELCOME50</div>
+        </div>
+      </div>
+      <div class="offer-card">
+        <div class="offer-emoji">🚚</div>
+        <div>
+          <div style="font-weight:800;font-size:1.1rem">FREE DELIVERY</div>
+          <div style="font-size:0.875rem;opacity:0.9;margin:4px 0">Zero delivery charges on any order</div>
+          <div class="offer-code">FREEDEL</div>
+        </div>
+      </div>
+      <div class="offer-card">
+        <div class="offer-emoji">💰</div>
+        <div>
+          <div style="font-weight:800;font-size:1.1rem">20% OFF</div>
+          <div style="font-size:0.875rem;opacity:0.9;margin:4px 0">On orders above ₹300</div>
+          <div class="offer-code">SAVE20</div>
+        </div>
+      </div>
+      <div class="offer-card">
+        <div class="offer-emoji">⭐</div>
+        <div>
+          <div style="font-weight:800;font-size:1.1rem">LOYALTY BONUS</div>
+          <div style="font-size:0.875rem;opacity:0.9;margin:4px 0">Earn points on every order</div>
+          <div class="offer-code">AUTO-APPLIED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="fade-up">How It <span class="gradient-text">Works</span></h2>
+    <p class="section-subtitle text-center" data-aos="fade-up">Order food in 3 simple steps</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-top:48px">
+      <div style="text-align:center" data-aos="fade-up" data-aos-delay="0">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--coral));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px;box-shadow:var(--shadow-orange)">📍</div>
+        <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:8px">Set Location</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem">Share your delivery address to find restaurants near you</p>
+      </div>
+      <div style="text-align:center" data-aos="fade-up" data-aos-delay="150">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--coral));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px;box-shadow:var(--shadow-orange)">🍽️</div>
+        <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:8px">Choose Food</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem">Browse menus, pick your favourites, add to cart</p>
+      </div>
+      <div style="text-align:center" data-aos="fade-up" data-aos-delay="300">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--coral));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px;box-shadow:var(--shadow-orange)">💳</div>
+        <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:8px">Pay Securely</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem">Pay via UPI, card, Razorpay or cash on delivery</p>
+      </div>
+      <div style="text-align:center" data-aos="fade-up" data-aos-delay="450">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--coral));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px;box-shadow:var(--shadow-orange)">🛵</div>
+        <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:8px">Fast Delivery</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem">Track live and enjoy hot food at your door</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title" data-aos="fade-up">What Our <span class="gradient-text">Customers Say</span></h2>
+    <p class="section-subtitle" data-aos="fade-up">Real reviews from real foodies</p>
+    <div class="reviews-track" data-aos="fade-up" data-aos-delay="100">
+      <div class="review-card">
+        <div class="review-header"><div class="reviewer-avatar">A</div><div><div class="reviewer-name">Aarav Sharma</div><div class="reviewer-location">Lucknow, UP</div></div></div>
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">Ordered biryani at 11pm and it arrived in 28 minutes, still piping hot. The app is super smooth and tracking is spot on!</p>
+      </div>
+      <div class="review-card">
+        <div class="review-header"><div class="reviewer-avatar">P</div><div><div class="reviewer-name">Priya Patel</div><div class="reviewer-location">Mumbai, MH</div></div></div>
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">The WELCOME50 coupon saved me money on my first order. Great restaurant selection and food quality is consistently excellent!</p>
+      </div>
+      <div class="review-card">
+        <div class="review-header"><div class="reviewer-avatar">R</div><div><div class="reviewer-name">Rahul Gupta</div><div class="reviewer-location">Delhi, DL</div></div></div>
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">Foodie Express has replaced all other delivery apps! Loyalty points system is amazing — earned a free meal in just a week!</p>
+      </div>
+      <div class="review-card">
+        <div class="review-header"><div class="reviewer-avatar">S</div><div><div class="reviewer-name">Sneha Joshi</div><div class="reviewer-location">Bangalore, KA</div></div></div>
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">Love the dark mode! Clean UI, fast delivery, accurate orders. The live tracking map is super reassuring!</p>
+      </div>
+      <div class="review-card">
+        <div class="review-header"><div class="reviewer-avatar">K</div><div><div class="reviewer-name">Karan Mehta</div><div class="reviewer-location">Pune, MH</div></div></div>
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">Live order tracking is a game changer. Could see the delivery partner on map the whole time. Super impressive app!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP DOWNLOAD -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center" data-aos="fade-up">
+      <div>
+        <div class="hero-eyebrow" style="margin-bottom:20px">📱 Mobile App</div>
+        <h2 class="section-title">Get the App.<br>Get <span class="gradient-text">10% Off</span> First Order.</h2>
+        <p style="color:var(--text-secondary);margin:16px 0 32px;font-size:1rem">Download Foodie Express for faster ordering, exclusive app-only deals, and real-time tracking on the go.</p>
+        <div class="app-badges">
+          <div class="app-badge"><span class="store-icon">🍎</span><div><div style="font-size:0.65rem;color:var(--text-muted)">Download on the</div><div style="font-weight:700">App Store</div></div></div>
+          <div class="app-badge"><span class="store-icon">🤖</span><div><div style="font-size:0.65rem;color:var(--text-muted)">Get it on</div><div style="font-weight:700">Google Play</div></div></div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:8rem;animation:floatCenter 4s ease-in-out infinite">📱</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:12px"><div class="logo-icon">🍔</div>Foodie<span style="color:var(--orange)">Express</span></div>
+        <p>India's fastest food delivery platform. Hot food delivered in 30 minutes from 500+ top restaurants.</p>
+        <div class="footer-social">
+          <a class="social-btn" href="#" aria-label="Facebook">f</a>
+          <a class="social-btn" href="#" aria-label="Twitter">𝕏</a>
+          <a class="social-btn" href="#" aria-label="Instagram">📷</a>
+          <a class="social-btn" href="#" aria-label="YouTube">▶</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Refund Policy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Newsletter</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:12px">Get exclusive deals in your inbox</p>
+        <form id="newsletter-form">
+          <div class="newsletter-form">
+            <input type="email" class="newsletter-input" placeholder="your@email.com" required>
+            <button type="submit" class="btn btn-primary btn-sm">→</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Foodie Express. All rights reserved. Made with ❤️ in India</p>
+      <p>🔒 Secured by Razorpay | SSL Encrypted</p>
+    </div>
+  </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div id="cart-overlay"></div>
+<div id="cart-sidebar">
+  <div class="cart-header">
+    <div class="cart-title">🛒 Your Cart</div>
+    <button class="cart-close">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="empty-cart"><div class="empty-icon">🛒</div><p>Your cart is empty</p></div>
+  </div>
+  <div class="cart-footer">
+    <div class="coupon-input-wrap">
+      <input type="text" class="coupon-input" placeholder="COUPON CODE" style="text-transform:uppercase">
+      <button class="btn btn-outline btn-sm" id="apply-coupon-btn">Apply</button>
+    </div>
+    <div class="cart-summary" id="cart-summary"></div>
+    <button class="btn btn-primary w-full" style="justify-content:center" id="checkout-btn">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close">✕</button>
+    <div id="auth-modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="js/app.js"></script>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwa-banner" style="display:none">
+  <div class="pwa-icon">🍔</div>
+  <div class="pwa-text">
+    <div class="pwa-title">Install Foodie Express</div>
+    <div class="pwa-sub">Add to home screen for faster ordering!</div>
+  </div>
+  <button class="btn btn-primary btn-sm" id="pwa-install-btn">Install</button>
+  <button class="btn btn-ghost btn-sm" id="pwa-dismiss-btn" style="padding:8px">✕</button>
+</div>
+<script>
+/* Service Worker Registration */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('SW registered:', reg.scope);
+    }).catch(function(err) {
+      console.log('SW registration failed:', err);
+    });
+  });
+}
+
+/* PWA Install Prompt */
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  var banner = document.getElementById('pwa-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    setTimeout(function() { banner.classList.add('show'); }, 3000);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  var installBtn = document.getElementById('pwa-install-btn');
+  var dismissBtn = document.getElementById('pwa-dismiss-btn');
+  if (installBtn) installBtn.addEventListener('click', function() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') Toast.success('Foodie Express installed! 🎉');
+      deferredPrompt = null;
+      var banner = document.getElementById('pwa-banner');
+      if (banner) { banner.classList.remove('show'); setTimeout(function() { banner.style.display = 'none'; }, 400); }
+    });
+  });
+  if (dismissBtn) dismissBtn.addEventListener('click', function() {
+    var banner = document.getElementById('pwa-banner');
+    if (banner) { banner.classList.remove('show'); setTimeout(function() { banner.style.display = 'none'; }, 400); }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "Foodie Express",
+  "short_name": "FoodieExp",
+  "description": "Order delicious food from top restaurants near you. Fast delivery guaranteed.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF6B2B",
+  "orientation": "portrait-primary",
+  "lang": "en-IN",
+  "categories": ["food", "shopping", "lifestyle"],
+  "icons": [
+    { "src": "assets/icon-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "assets/screenshot-mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Order Food",
+      "short_name": "Order",
+      "description": "Browse restaurants and order food",
+      "url": "/restaurants.html",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Track Order",
+      "short_name": "Track",
+      "description": "Track your live order",
+      "url": "/pages/track.html",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Offers",
+      "short_name": "Offers",
+      "description": "Browse deals and coupons",
+      "url": "/pages/offers.html",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
